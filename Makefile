@@ -19,3 +19,7 @@ bin/test_main.o :
 
 program:
 	clang $(CC) $(CC_FLAGS) $(CPP_FILES)
+
+clean:
+	rm -rf bin/* bin/*.o
+

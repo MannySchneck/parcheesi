@@ -70,7 +70,7 @@ std::pair<Status, Board> Game::process_moves(std::vector<std::shared_ptr<IMove>>
         Board new_board = board;
         Status status;
         for(auto m : moves){
-                status = m->update_board(new_board);
+                //status = m->update_board(new_board);
         }
         return std::pair<Status,Board> (status, new_board);
 }

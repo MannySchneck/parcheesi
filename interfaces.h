@@ -5,9 +5,11 @@
 #include <string>
 #include <utility>
 
+
 using fuel = std::vector<int>;
 
 class Board;
+class IMove;
 
 enum class Status {
         normal,
@@ -17,14 +19,6 @@ enum class Status {
 };
 
 
-class IMove {
-public:
-        virtual Status update_board(Board &b) = 0;
-protected:
-        IMove() = default;
-};
-
-using mv_ptr = std::shared_ptr<IMove>;
 
 class IPlayer {
 public:

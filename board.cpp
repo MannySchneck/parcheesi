@@ -4,7 +4,56 @@
 #include <iostream>
 #include <vector>
 
-bool Board::is_contains(int start, int end, int pos){
+std::vector<std::vector<Pawn>>
+Board::get_intermediate_spaces(int start,
+                               int distance,
+                               Pawn p,
+                               Section section) const{
+
+        std::vector<std::vector<Pawn>> spaces;
+        for(int i = 0; i <= distance; i++){
+                if(!(section.find(start + i % ring_spaces) == positions.end())){
+                        spaces.push_back(section[start + i % ring_spaces]);
+                }
+        }
+
+        return spaces;
+}
+
+std::vector<Space> Board::get_intermediate_spaces_hr(int start, int distance, Pawn p) const{
+        return get_intermediate_spaces(start, distance, p, home_rows.at(p.color));
+}
+
+std::vector<std::vector<Pawn>>
+Board::get_intermediate_spaces_main(int start, int distance, Pawn p) const{
+
+        std::vector<std::vector<Pawn>> spaces;
+
+        int final_pos = start + distance;
+        if(is_contains(start, final_pos, final_ring.at(p.color))){
+                int num_up_to_hr = modulo(final_ring.at(p.color) - start, ring_spaces);
+                int num_into_hr = modulo(final_pos - final_ring.at(p.color), ring_spaces);
+
+                auto st = get_intermediate_spaces(start, num_up_to_hr, p, positions).begin();
+                auto end = get_intermediate_spaces(start, num_up_to_hr, p, positions).end();
+                spaces.insert(spaces.end(), st, end);
+
+                st = get_intermediate_spaces(0, num_into_hr, p, home_rows.at(p.color)).begin();
+                end = get_intermediate_spaces(0, num_into_hr, p, home_rows.at(p.color)).end();
+                spaces.insert(spaces.end(), st, end);
+
+                return spaces;
+        }
+
+        return get_intermediate_spaces(start, distance, p, positions);
+}
+
+bool Board::is_safety_space(int pos) const{
+        return safety_spaces.count(pos);
+}
+
+
+bool Board::is_contains(int start, int end, int pos) const{
         if(end < start){
                 return (pos < end) ||
                         (pos >= start);
