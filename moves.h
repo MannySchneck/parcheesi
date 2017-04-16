@@ -5,7 +5,7 @@
 
 
 // represents a move where a player enters a piece
-class EnterPiece : IMove{
+class EnterPiece : public IMove{
         Pawn pawn;
         EnterPiece(Pawn pawn) :
                 pawn(pawn)
@@ -16,11 +16,13 @@ class EnterPiece : IMove{
 
 // represents a move that starts on the main ring
 // (but does not have to end up there)
-class MoveMain : IMove{
+class MoveMain : public IMove{
         Pawn pawn;
         int start;
         int distance;
-        MoveMain(Pawn pawn, int start, int distance)
+
+ public:
+        MoveMain(int start, int distance, Pawn pawn)
                 : pawn(pawn)
         {
                 this->pawn=pawn;
@@ -32,7 +34,7 @@ class MoveMain : IMove{
 };
 
 // represents a move that starts on one of the home rows
-class MoveHome : IMove{
+class MoveHome : public IMove{
         Pawn pawn;
         int start;
         int distance;

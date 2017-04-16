@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <utility>
 #include <exception>
+#include "catch.hpp"
 
 void Game::register_player(std::shared_ptr<IPlayer> p){
         players.push_back(p);
@@ -14,19 +15,22 @@ std::pair<int,int> Game::roll_dice(){
 }
 
 void Game::start(){
-        bool is_winner;
+        bool is_winner(false);
         while(!is_winner){
                 for(auto p : players){
                         bool turn_done(false);
                         Status status = Status::normal;
 
-                        while(!turn_done){
+                        std::pair<int,int> dice;
+                        std::pair<Status, Board> moves_result;
 
+                        while(!turn_done){
                                 std::vector<std::shared_ptr<IMove>> moves;
 
                                 switch(status){
                                 case (Status::normal):
-                                        moves = p->doMove(board, roll_dice());
+                                        dice = roll_dice();
+                                        moves = p->doMove(board, dice);
                                         break;
                                 case (Status::bop_bonus):
                                         moves = p->doMove(board, std::pair<int,int>(20,0));
@@ -36,7 +40,7 @@ void Game::start(){
                                         break;
                                 }
 
-                                auto moves_result = process_moves(moves);
+                                moves_result = process_moves(moves);
 
                                 switch(moves_result.first){
                                 case (Status::bop_bonus):
@@ -55,9 +59,8 @@ void Game::start(){
                                 default:
                                         throw new std::logic_error("can't happen");
                                 }
-
-                                //check_final_board(old_board, new_board);
                         }
+                        board.valid_board_transition(moves_result.second, dice);
                 }
         }
 }

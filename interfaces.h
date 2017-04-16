@@ -5,6 +5,8 @@
 #include <string>
 #include <utility>
 
+using fuel = std::vector<int>;
+
 class Board;
 
 enum class Status {
@@ -19,8 +21,10 @@ class IMove {
 public:
         virtual Status update_board(Board &b) = 0;
 protected:
-        IMove();
+        IMove() = default;
 };
+
+using mv_ptr = std::shared_ptr<IMove>;
 
 class IPlayer {
 public:
@@ -54,9 +58,14 @@ public:
 
         Pawn (const Pawn &rhs) = default;
 
-        bool operator==(const Pawn &rhs){
+        bool operator==(const Pawn &rhs) const{
                 return id == rhs.id &&
                         color == rhs.color;
+        }
+
+        bool operator!=(const Pawn &rhs) const{
+                return !(id == rhs.id &&
+                        color == rhs.color);
         }
 
         int /* 0-3 */ id;

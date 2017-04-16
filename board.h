@@ -25,6 +25,13 @@ public:
                 final_ring["green"] = 34;
                 final_ring["red"] = 51;
         }
+        /*********************************************************************/
+        /*                             Interface                             */
+        /*********************************************************************/
+        std::vector<Pawn> get_pawns_at_pos(int pos){
+                return positions[pos];
+        }
+
 
         bool is_contains(int start, int end, int pos);
 
@@ -42,15 +49,18 @@ public:
 
         Status try_bop(int pos, Pawn p, bool entering);
 
-        #ifdef TEST
-        std::vector<Pawn> get_pawns_at_pos(int pos){
-                return positions[pos];
-        }
+        std::vector<int> board_diff(Board b);
+
+        bool valid_board_transition(Board b, std::pair<int, int> dice);
+
 
         int get_color_start_space(std::string color){
                 return starting_pos[color];
         }
-        #endif
+
+        void put_pawn(Pawn p, int pos){
+                positions[pos].push_back(p);
+        }
 private:
         // The board's 0 position is the blue color's
         // home row entry square
@@ -68,4 +78,5 @@ public:
         std::unordered_map<std::string, int> final_ring;
         using home_row_t = std::unordered_map<int, std::vector<Pawn>>;
         std::unordered_map<std::string, home_row_t> home_rows;
+        std::unordered_map<std::string, int> pawn_reservoirs;
 };
