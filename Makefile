@@ -4,7 +4,7 @@ CPP_TEST_FILES :=  test/rules_tests.cpp
 
 TEST_MAIN_CPP := test/catch_main.cpp
 
-CC_FLAGS := --std=c++11
+CC_FLAGS := --std=c++11 -O0 -g
 
 CC := clang++
 

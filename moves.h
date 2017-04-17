@@ -28,32 +28,36 @@ private:
         //Status update_board(Board &b) override;
 };
 
+class Move : public IMove{
+public:
+        Move(int start, int distance, Pawn pawn);
+
+        Pawn get_pawn();
+        int get_start();
+        int get_distance();
+private:
+        Pawn pawn;
+        int start;
+        int distance;
+};
+
 // represents a move that starts on the main ring
 // (but does not have to end up there)
-class MoveMain : public IMove{
+class MoveMain : public Move{
 
- public:
+public:
         MoveMain(int start, int distance, Pawn pawn);
 
         Status validate(Rules_Checker &rc, Board board) override;
         //Status update_board(Board &b) override;
-        Pawn pawn;
-        int start;
-        int distance;
-
 };
 
 // represents a move that starts on one of the home rows
-class MoveHome : public IMove{
+class MoveHome : public Move{
 public:
         MoveHome(Pawn pawn, int start, int distance);
 
         Status validate(Rules_Checker &rc, Board board) override;
 
         //Status update_board(Board &b) override;
-private:
-        Pawn pawn;
-        int start;
-        int distance;
-
 };

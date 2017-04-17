@@ -4,6 +4,10 @@
 #include <iostream>
 #include <vector>
 
+int Board::get_hr_spaces() const{
+        return home_row_spaces;
+}
+
 std::vector<std::vector<Pawn>>
 Board::get_intermediate_spaces(int start,
                                int distance,
@@ -18,6 +22,24 @@ Board::get_intermediate_spaces(int start,
         }
 
         return spaces;
+}
+
+std::vector<Pawn> Board::get_pawns_at_pos(int pos) const{
+        try{
+                Space posns = positions.at(pos);
+                return posns;
+        } catch(const std::out_of_range& e){
+                return std::vector<Pawn>{};
+        }
+}
+
+std::vector<Pawn> Board::get_pawns_at_pos(int pos, std::string color) const{
+        try{
+                Space posns = home_rows.at(color).at(pos);
+                return posns;
+        } catch(const std::out_of_range& e){
+                return std::vector<Pawn>{};
+        }
 }
 
 std::vector<Space> Board::get_intermediate_spaces_hr(int start, int distance, Pawn p) const{
@@ -104,7 +126,7 @@ Status Board::move_pawn(int start, int dist, Pawn p){ // XXX
                         return Status::cheated;
 
                 int num_into_hr = modulo(final_pos - final_ring[p.color], ring_spaces);
-                move_onto_hr(start, num_into_hr, p);
+                return move_onto_hr(start, num_into_hr, p);
         }
 
         if(is_blockade(start, dist))
