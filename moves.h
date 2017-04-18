@@ -9,7 +9,7 @@ class Rules_Checker;
 class IMove {
 public:
         //virtual Status update_board(Board &b) = 0;
-        virtual Status validate(Rules_Checker &rc, Board board) = 0;
+        virtual Status inspect(Rules_Checker &rc, Board board) = 0;
 protected:
         IMove();
 };
@@ -22,7 +22,9 @@ class EnterPiece : public IMove{
 public:
         EnterPiece(Pawn pawn);
 
-        Status validate(Rules_Checker &rc, Board board) override;
+        Status inspect(Rules_Checker &rc, Board board) override;
+
+        Pawn get_pawn();
 private:
         Pawn pawn;
         //Status update_board(Board &b) override;
@@ -48,16 +50,16 @@ class MoveMain : public Move{
 public:
         MoveMain(int start, int distance, Pawn pawn);
 
-        Status validate(Rules_Checker &rc, Board board) override;
+        Status inspect(Rules_Checker &rc, Board board) override;
         //Status update_board(Board &b) override;
 };
 
 // represents a move that starts on one of the home rows
 class MoveHome : public Move{
 public:
-        MoveHome(Pawn pawn, int start, int distance);
+  MoveHome(int start, int distance, Pawn p);
 
-        Status validate(Rules_Checker &rc, Board board) override;
+        Status inspect(Rules_Checker &rc, Board board) override;
 
         //Status update_board(Board &b) override;
 };

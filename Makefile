@@ -18,7 +18,7 @@ bin/test_main.o :
 	$(CC) $(CC_FLAGS) -c test/catch_main.cpp -o $@
 
 program:
-	clang $(CC) $(CC_FLAGS) $(CPP_FILES)
+	$(CC) $(CC_FLAGS) $(CPP_FILES)
 
 clean:
 	rm -rf bin/* bin/*.o

@@ -1,16 +1,30 @@
 #include "interfaces.h"
 #include "moves.h"
 
-Status MoveMain::validate(Rules_Checker &rc, Board board){
-        return rc.validate_main_move(this, board);
+Status MoveMain::inspect(Rules_Checker &rc, Board board){
+  if(!rc.validate_main_move(this, board)){
+      return Status::cheated;
+    }
+    return Status::normal;
 }
 
-Status EnterPiece::validate(Rules_Checker &rc, Board board){
-        return Status::cheated;
+Status EnterPiece::inspect(Rules_Checker &rc, Board board){
+
+  if(!rc.validate_enter_move(this, board)){
+    return Status::cheated;
+  }
+  return Status::normal;
 }
 
-Status MoveHome::validate(Rules_Checker &rc, Board board){
-        return rc.validate_home_move(this, board);
+Pawn EnterPiece::get_pawn(){
+  return pawn;
+}
+
+Status MoveHome::inspect(Rules_Checker &rc, Board board){
+  if(!rc.validate_home_move(this, board)){
+    return Status::cheated;
+  }
+  return Status::normal;
 }
 
 
@@ -41,5 +55,5 @@ int Move::get_distance(){
 MoveMain::MoveMain(int start, int distance, Pawn pawn)
         : Move(start,distance,pawn){}
 
-MoveHome::MoveHome(Pawn pawn, int start, int distance)
+MoveHome::MoveHome(int start, int distance, Pawn pawn)
         : Move(start,distance,pawn){}

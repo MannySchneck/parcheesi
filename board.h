@@ -33,13 +33,13 @@ class Board {
         /*********************************************************************/
         /*                             Interface                             */
         /*********************************************************************/
-        std::vector<Pawn> get_pawns_at_pos(int pos) const;
-        std::vector<Pawn> get_pawns_at_pos(int pos, std::string) const;
+        std::vector<Pawn> get_pawns_at_pos(int pos);
+        std::vector<Pawn> get_pawns_at_pos(int pos, std::string);
 
         using Section = std::unordered_map<int, std::vector<Pawn>>;
 
-        std::vector<Space> get_intermediate_spaces_main(int start, int distance, Pawn p) const;
-        std::vector<Space> get_intermediate_spaces_hr(int start, int distance, Pawn p) const;
+        std::vector<Space> get_intermediate_spaces_main(int start, int distance, Pawn p) ;
+        std::vector<Space> get_intermediate_spaces_hr(int start, int distance, Pawn p) ;
 
         bool is_safety_space(int pos) const;
         bool is_contains(int start, int end, int pos) const;
@@ -73,7 +73,7 @@ class Board {
                 get_intermediate_spaces(int start,
                                         int distance,
                                         Pawn p,
-                                        Section section) const;
+                                        Section section);
 
 #ifdef TEST
  public:
