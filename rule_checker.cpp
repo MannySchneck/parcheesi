@@ -119,6 +119,65 @@ bool Rules_Checker::start_blockaded(EnterPiece* mv, Board &old_board){
   return pawns.size() > 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//                Check for validity of turn (multiple moves)                //
+///////////////////////////////////////////////////////////////////////////////
+bool Rules_Checker::validate_turn(Board &old_board, Board &new_board, std::string color){
+  return !(moved_blockade_together(old_board, new_board) ||
+           has_more_moves(new_board, color));
+
+}
+
+// Must be called every turn
+bool Rules_Checker::moved_blockade_together(Board &old_board, Board &new_board){
+  std::unordered_set<int> original_blockades(old_board.get_blockades());
+  std::unordered_set<int> new_blockades(new_board.get_blockades());
+
+  for(auto blockade : new_blockades){
+    if(original_blockades.count(blockade) == 0){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+enum posn_fields{
+  pawn,
+  loc,
+  is_home
+};
+
+bool Rules_Checker::a_move_exists(Pawn p, int loc, bool home, Board &new_board){
+  for(auto f : fuel){
+    if(home){
+      MoveHome mh(loc, f, p);
+      if(mh.inspect(*this, new_board) != Status::cheated) return true;
+    } else {
+      MoveMain mm(loc, f, p);
+      if(mm.inspect(*this, new_board) != Status::cheated) return true;
+    }
+  }
+  return false;
+}
+
+bool Rules_Checker::has_more_moves(Board &new_board, std::string color){
+  auto posns = new_board.get_pawns_of_color(color);
+
+  bool move_exists = false;
+
+  for(auto posn : posns){
+    auto the_pawn = std::get<pawn>(posn);
+    auto the_loc = std::get<loc>(posn);
+    auto the_is_home = std::get<is_home>(posn);
+
+    move_exists = move_exists | a_move_exists(the_pawn, the_loc, the_is_home, new_board);
+  }
+}
+
+
+
+
 // // @pre: check for blockades was run
 // bool Rules_Checker::did_bop(IMove* mv, Board &old_board){
 

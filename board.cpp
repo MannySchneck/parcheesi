@@ -3,6 +3,10 @@
 #include "catch.hpp"
 #include <iostream>
 #include <vector>
+#include <tuple>
+
+
+using Posn = std::tuple<Pawn, int, bool>;
 
 int Board::get_hr_spaces() const{
   return home_row_spaces;
@@ -26,6 +30,25 @@ Board::get_intermediate_spaces(int start,
 
 std::vector<Pawn> Board::get_pawns_at_pos(int pos) {
   return positions[pos];
+}
+
+
+std::vector<Posn> Board::get_pawns_of_color(std::string color){
+  std::vector<Posn> the_pawns;
+
+  for(auto space : positions){
+    for(auto p : space.second){
+      if(p.color == color) the_pawns.push_back(Posn{p, space.first, false});
+    }
+  }
+
+  for(auto space : home_rows[color]){
+    for(auto p : space.second){
+      if(p.color == color) the_pawns.push_back(Posn{p, space.first, true});
+    }
+  }
+
+  return the_pawns;
 }
 
 std::vector<Pawn> Board::get_pawns_at_pos(int pos, std::string color) {
@@ -154,6 +177,21 @@ Status Board::try_bop(int pos, Pawn p, bool entering){
   return Status::normal;
 }
 
+std::unordered_set<int> Board::get_blockades(){
+  std::unordered_set<int> original_blockades;
+
+  for(auto space : positions){
+    int pos = space.first;
+    auto pawns = space.second;
+    if(pawns.size() == 2) {
+      original_blockades.insert(pos);
+    }
+  }
+
+  return original_blockades;
+}
+
+// XXX: Deprecated
 bool Board::valid_board_transition(Board b, std::pair<int, int> dice){
   //std::vector<int> changed_positions = board_diff(b);
   std::unordered_set<int> original_blockades;
@@ -317,6 +355,9 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
 
 TEST_CASE("check_final_board", "test checking board after full turn complete"){
+  Pawn p0(0, "blue");
+  Pawn p1(1, "blue");
+
   SECTION("Test move blockade together"){
     Board board1;
     Pawn p0(0, "blue");
@@ -351,6 +392,32 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
     board2.put_pawn(p1, board2.get_color_start_space("blue") + 4);
 
     REQUIRE(board1.valid_board_transition(board2, dice) == true);
+  }
+
+  SECTION("Get pawns of color"){
+    Board board;
+    Pawn p2(2, "blue");
+    Pawn p3(0, "red");
+
+
+    board.put_pawn(p0, 2);
+    board.put_pawn(p1, 16);
+    board.put_pawn(p2, board.final_ring[p2.color]);
+    board.move_pawn(board.final_ring[p2.color], 5, p2);
+
+    board.put_pawn(p3, 5);
+
+    Posn pos0{p0, 2, false};
+    Posn pos1{p1, 16, false};
+    Posn pos2{p2, 5, true};
+    Posn pos3{p3, 5, false};
+    auto pawns = board.get_pawns_of_color(p0.color);
+
+    REQUIRE(std::find(pawns.begin(), pawns.end(), pos0) != pawns.end());
+    REQUIRE(std::find(pawns.begin(), pawns.end(), pos1) != pawns.end());
+    REQUIRE(std::find(pawns.begin(), pawns.end(), pos2) != pawns.end());
+    REQUIRE(std::find(pawns.begin(), pawns.end(), pos3) == pawns.end());
+
   }
 
 }

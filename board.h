@@ -33,13 +33,17 @@ class Board {
         /*********************************************************************/
         /*                             Interface                             */
         /*********************************************************************/
+        using Posn = std::tuple<Pawn, int, bool>;
+
         std::vector<Pawn> get_pawns_at_pos(int pos);
         std::vector<Pawn> get_pawns_at_pos(int pos, std::string);
+        std::vector<Posn> get_pawns_of_color(std::string);
 
         using Section = std::unordered_map<int, std::vector<Pawn>>;
 
         std::vector<Space> get_intermediate_spaces_main(int start, int distance, Pawn p) ;
         std::vector<Space> get_intermediate_spaces_hr(int start, int distance, Pawn p) ;
+        std::unordered_set<int> get_blockades();
 
         bool is_safety_space(int pos) const;
         bool is_contains(int start, int end, int pos) const;

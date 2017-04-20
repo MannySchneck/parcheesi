@@ -160,3 +160,25 @@ TEST_CASE("blockades"){
     REQUIRE(mv->inspect(rc, board) == Status::cheated);
   }
 }
+
+TEST_CASE("Advancing Blockades"){
+  Board board;
+  Board board2;
+  Board board3;
+  Pawn p0(0,"red");
+  Pawn p1(1,"red");
+
+  board.put_pawn(p0, 12);
+  board.put_pawn(p1, 12);
+
+  Rules_Checker rc{{3,3}};
+  board2.put_pawn(p0, 15);
+  board2.put_pawn(p1, 15);
+
+  Rules_Checker rc2({3,4});
+  board3.put_pawn(p0, 15);
+  board3.put_pawn(p1, 16);
+
+  REQUIRE(rc.moved_blockade_together(board, board2) == true);
+  REQUIRE(rc2.moved_blockade_together(board, board3) == false);
+}

@@ -22,6 +22,8 @@ class Rules_Checker {
 
         bool validate_enter_move(EnterPiece* mv, Board &old_board);
 
+        bool validate_turn(Board &old_board, Board &new_board, std::string color);
+
  private:
 #if TEST
  public:
@@ -35,5 +37,12 @@ class Rules_Checker {
         bool pawn_doesnt_exist(Move* mv, Board &old_board);
         bool moved_past_home(MoveHome* mv, Board &old_board);
         bool illegal_distance(IMove* mv, Board &old_board);
+
+        bool moved_blockade_together(Board &old_board, Board &new_board);
+        bool has_more_moves(Board &new_board, std::string color);
+
+
+        bool a_move_exists(Pawn p, int loc, bool home, Board &new_board);
+
         fuel fuel;
 };
