@@ -18,6 +18,23 @@ enum class Status {
         cheated
 };
 
+enum class Color {
+        red,
+                green,
+                blue,
+                yellow
+                };
+
+struct enum_hash
+{
+        template <typename T>
+        inline
+        typename std::enable_if<std::is_enum<T>::value, std::size_t>::type
+                operator ()(T const value) const
+        {
+                return static_cast<std::size_t>(value);
+        }
+};
 
 
 class IPlayer {
