@@ -33,7 +33,7 @@ std::vector<Pawn> Board::get_pawns_at_pos(int pos) {
 }
 
 
-std::vector<Posn> Board::get_pawns_of_color(std::string color){
+std::vector<Posn> Board::get_pawns_of_color(Color color){
   std::vector<Posn> the_pawns;
 
   for(auto space : positions){
@@ -51,7 +51,7 @@ std::vector<Posn> Board::get_pawns_of_color(std::string color){
   return the_pawns;
 }
 
-std::vector<Pawn> Board::get_pawns_at_pos(int pos, std::string color) {
+std::vector<Pawn> Board::get_pawns_at_pos(int pos, Color color) {
   return home_rows[color][pos];
 }
 
@@ -155,7 +155,7 @@ void Board::remove_pawn(int pos, Pawn p){
 
 
 Status Board::enter_pawn(Pawn p){
-  std::string color = p.color;
+  Color color = p.color;
   int start_pos = starting_pos[color];
   if(is_blockade(start_pos, 0))
     return Status::cheated;
@@ -221,26 +221,26 @@ TEST_CASE("Enter Pawn", "[Enter Pawn]") {
   Board board;
 
 
-  SECTION("red"){
-    Pawn p(0, "red");
+  SECTION("Color::red"){
+    Pawn p(0, Color::red);
     REQUIRE(board.enter_pawn(p) == Status::normal);
-    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space("red"))[0] == p);
+    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::red))[0] == p);
   }
 
   SECTION("blue 1 pawn"){
-    Pawn p(3,"blue");
+    Pawn p(3,Color::blue);
     REQUIRE(board.enter_pawn(p) == Status::normal);
-    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space("blue"))[0] == p);
+    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue))[0] == p);
 
   }
 
   SECTION("blue 2 pawns"){
-    Pawn p(3,"blue");
-    Pawn p2(2, "blue");
+    Pawn p(3,Color::blue);
+    Pawn p2(2, Color::blue);
     REQUIRE(board.enter_pawn(p) == Status::normal);
     REQUIRE(board.enter_pawn(p2) == Status::normal);
-    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space("blue"))[0] == p);
-    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space("blue"))[1] == p2);
+    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue))[0] == p);
+    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue))[1] == p2);
 
   }
 
@@ -250,15 +250,15 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
   SECTION("Test i = 12"){
     int i = 12;
-    Pawn p(0,"blue");
+    Pawn p(0,Color::blue);
     Board board;
 
     board.enter_pawn(p);
 
-    REQUIRE(board.move_pawn(board.get_color_start_space("blue"), i, p) ==
+    REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), i, p) ==
             Status::normal);
 
-    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space("blue")
+    REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue)
                                    + i % board.ring_spaces)[0]
             == p);
 
@@ -268,15 +268,15 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
   SECTION("Test all moves from beginning"){
     for(int i = 1; i < 21; i++){
-      Pawn p(0,"blue");
+      Pawn p(0,Color::blue);
       Board board;
 
       board.enter_pawn(p);
 
-      REQUIRE(board.move_pawn(board.get_color_start_space("blue"), i, p) ==
+      REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), i, p) ==
               Status::normal);
 
-      REQUIRE(board.get_pawns_at_pos(board.get_color_start_space("blue")
+      REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue)
                                      + i % board.ring_spaces)[0]
               == p);
 
@@ -285,11 +285,11 @@ TEST_CASE("move_pawn", "test move to safety space"){
   }
 
   SECTION("Test Move into Blockade"){
-    Pawn p0(0,"red");
-    Pawn p1(1,"red");
-    Pawn p2(2,"red");
+    Pawn p0(0,Color::red);
+    Pawn p1(1,Color::red);
+    Pawn p2(2,Color::red);
     Board board;
-    int red_start(board.get_color_start_space("red"));
+    int red_start(board.get_color_start_space(Color::red));
     int blockade_target = red_start + 5;
     board.put_pawn(p0, blockade_target);
     board.enter_pawn(p1);
@@ -302,66 +302,66 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
     board.enter_pawn(p2);
 
-    REQUIRE(board.move_pawn(board.get_color_start_space("red"), 5, p2)
+    REQUIRE(board.move_pawn(board.get_color_start_space(Color::red), 5, p2)
             == Status::cheated);
   }
 
   SECTION("Test bop"){
     Board board;
-    Pawn p0(0, "red");
+    Pawn p0(0, Color::red);
 
-    board.put_pawn(p0, board.get_color_start_space("blue") + 4);
+    board.put_pawn(p0, board.get_color_start_space(Color::blue) + 4);
 
-    Pawn p1(0, "blue");
+    Pawn p1(0, Color::blue);
     board.enter_pawn(p1);
 
-    REQUIRE(board.move_pawn(board.get_color_start_space("blue"), 4, p1)
+    REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), 4, p1)
             == Status::bop_bonus);
 
-    REQUIRE(board.positions[board.get_color_start_space("blue")+4].size() == 1);
-    REQUIRE(board.positions[board.get_color_start_space("blue")+4][0] == p1);
+    REQUIRE(board.positions[board.get_color_start_space(Color::blue)+4].size() == 1);
+    REQUIRE(board.positions[board.get_color_start_space(Color::blue)+4][0] == p1);
   }
 
   SECTION("Test no bop on safety space"){
     Board board;
-    Pawn p0(0, "red");
+    Pawn p0(0, Color::red);
 
-    board.put_pawn(p0, board.get_color_start_space("blue") + 7);
+    board.put_pawn(p0, board.get_color_start_space(Color::blue) + 7);
 
-    Pawn p1(0, "blue");
+    Pawn p1(0, Color::blue);
     board.enter_pawn(p1);
 
-    REQUIRE(board.move_pawn(board.get_color_start_space("blue"), 7, p1)
+    REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), 7, p1)
             == Status::cheated);
 
-    REQUIRE(board.positions[board.get_color_start_space("blue")][0] == p1);
+    REQUIRE(board.positions[board.get_color_start_space(Color::blue)][0] == p1);
 
-    REQUIRE(board.positions[board.get_color_start_space("blue") + 7][0] == p0);
+    REQUIRE(board.positions[board.get_color_start_space(Color::blue) + 7][0] == p0);
   }
 
   SECTION("Test bop safety space on enter") {
     Board board;
-    Pawn p0(0, "red");
+    Pawn p0(0, Color::red);
 
-    board.put_pawn(p0, board.get_color_start_space("blue"));
+    board.put_pawn(p0, board.get_color_start_space(Color::blue));
 
-    Pawn p1(0, "blue");
+    Pawn p1(0, Color::blue);
     REQUIRE(board.enter_pawn(p1) == Status::bop_bonus);
 
-    REQUIRE(board.positions[board.get_color_start_space("blue")][0] == p1);
-    REQUIRE(board.positions[board.get_color_start_space("blue")].size() == 1);
+    REQUIRE(board.positions[board.get_color_start_space(Color::blue)][0] == p1);
+    REQUIRE(board.positions[board.get_color_start_space(Color::blue)].size() == 1);
   }
 }
 
 
 TEST_CASE("check_final_board", "test checking board after full turn complete"){
-  Pawn p0(0, "blue");
-  Pawn p1(1, "blue");
+  Pawn p0(0, Color::blue);
+  Pawn p1(1, Color::blue);
 
   SECTION("Test move blockade together"){
     Board board1;
-    Pawn p0(0, "blue");
-    Pawn p1(1, "blue");
+    Pawn p0(0, Color::blue);
+    Pawn p1(1, Color::blue);
 
     std::pair<int, int> dice(3,3);
 
@@ -370,8 +370,8 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
 
 
     Board board2;
-    board2.put_pawn(p0, board2.get_color_start_space("blue") + 3);
-    board2.put_pawn(p1, board2.get_color_start_space("blue") + 3);
+    board2.put_pawn(p0, board2.get_color_start_space(Color::blue) + 3);
+    board2.put_pawn(p1, board2.get_color_start_space(Color::blue) + 3);
 
     REQUIRE(board1.valid_board_transition(board2, dice) == false);
   }
@@ -379,8 +379,8 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
 
   SECTION("Test move blockade separate (should be ok)"){
     Board board1;
-    Pawn p0(0, "blue");
-    Pawn p1(1, "blue");
+    Pawn p0(0, Color::blue);
+    Pawn p1(1, Color::blue);
 
     std::pair<int, int> dice(3,4);
 
@@ -388,16 +388,16 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
     board1.enter_pawn(p1);
 
     Board board2;
-    board2.put_pawn(p0, board2.get_color_start_space("blue") + 3);
-    board2.put_pawn(p1, board2.get_color_start_space("blue") + 4);
+    board2.put_pawn(p0, board2.get_color_start_space(Color::blue) + 3);
+    board2.put_pawn(p1, board2.get_color_start_space(Color::blue) + 4);
 
     REQUIRE(board1.valid_board_transition(board2, dice) == true);
   }
 
   SECTION("Get pawns of color"){
     Board board;
-    Pawn p2(2, "blue");
-    Pawn p3(0, "red");
+    Pawn p2(2, Color::blue);
+    Pawn p3(0, Color::red);
 
 
     board.put_pawn(p0, 2);

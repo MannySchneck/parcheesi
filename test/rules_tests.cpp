@@ -4,13 +4,13 @@
 #include "../moves.h"
 
 TEST_CASE("blockades"){
-  Pawn p0(0,"red");
-  Pawn p1(1,"red");
-  Pawn p2(2,"red");
-  Pawn bp0(0, "blue");
+        Pawn p0(0,Color::red);
+  Pawn p1(1,Color::red);
+  Pawn p2(2,Color::red);
+  Pawn bp0(0, Color::blue);
   Board board;
 
-  int red_start(board.get_color_start_space("red"));
+  int red_start(board.get_color_start_space(Color::red));
 
   int blockade_target = red_start + 5;
 
@@ -22,7 +22,7 @@ TEST_CASE("blockades"){
 
   mv_ptr mv(new MoveMain(red_start, 5, p1));
 
-  int blue_start = board.get_color_start_space("blue");
+  int blue_start = board.get_color_start_space(Color::blue);
 
   SECTION("can move to make blockade"){
     REQUIRE(mv->inspect(rc, board)
@@ -57,7 +57,7 @@ TEST_CASE("blockades"){
   }
 
   // SECTION("can bop"){
-  //   board.put_pawn(p0, board.get_color_start_space("blue") + 8);
+  //   board.put_pawn(p0, board.get_color_start_space(Color::blue) + 8);
 
   //   board.put_pawn(bp0, blue_start + 4);
 
@@ -70,7 +70,7 @@ TEST_CASE("blockades"){
   // }
 
   SECTION("pawn exists at start space"){
-    board.put_pawn(p0, board.get_color_start_space("blue") + 7);
+    board.put_pawn(p0, board.get_color_start_space(Color::blue) + 7);
 
     board.put_pawn(bp0, blue_start + 3);
 
@@ -87,7 +87,7 @@ TEST_CASE("blockades"){
 
 
   SECTION("can't bop a safety"){
-    board.put_pawn(p0, board.get_color_start_space("blue") + 7);
+    board.put_pawn(p0, board.get_color_start_space(Color::blue) + 7);
 
     board.put_pawn(bp0, blue_start + 3);
 
@@ -165,8 +165,8 @@ TEST_CASE("Advancing Blockades"){
   Board board;
   Board board2;
   Board board3;
-  Pawn p0(0,"red");
-  Pawn p1(1,"red");
+  Pawn p0(0,Color::red);
+  Pawn p1(1,Color::red);
 
   board.put_pawn(p0, 12);
   board.put_pawn(p1, 12);

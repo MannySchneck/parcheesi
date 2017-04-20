@@ -41,7 +41,7 @@ class IPlayer {
 public:
         // inform the player that a game has started
         // and what color the player is.
-        virtual void startGame(std::string color) = 0;
+        virtual void startGame(Color color) = 0;
 
         // ask the player what move they want to make
         virtual std::vector<std::shared_ptr<IMove>> doMove(Board brd, std::pair<int, int> dice) = 0;
@@ -62,7 +62,7 @@ class IGame {
 
 class Pawn {
 public:
-        Pawn (int id, std::string color) {
+        Pawn (int id, Color color) {
                 this->id=id;
                 this->color=color;
         }
@@ -80,7 +80,7 @@ public:
         }
 
         int /* 0-3 */ id;
-        std::string color;
+        Color color;
 
 };
 

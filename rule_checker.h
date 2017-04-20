@@ -22,7 +22,7 @@ class Rules_Checker {
 
         bool validate_enter_move(EnterPiece* mv, Board &old_board);
 
-        bool validate_turn(Board &old_board, Board &new_board, std::string color);
+        bool validate_turn(Board &old_board, Board &new_board, Color color);
 
  private:
 #if TEST
@@ -39,7 +39,7 @@ class Rules_Checker {
         bool illegal_distance(IMove* mv, Board &old_board);
 
         bool moved_blockade_together(Board &old_board, Board &new_board);
-        bool has_more_moves(Board &new_board, std::string color);
+        bool has_more_moves(Board &new_board, Color color);
 
 
         bool a_move_exists(Pawn p, int loc, bool home, Board &new_board);

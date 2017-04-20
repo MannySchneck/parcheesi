@@ -122,7 +122,7 @@ bool Rules_Checker::start_blockaded(EnterPiece* mv, Board &old_board){
 ///////////////////////////////////////////////////////////////////////////////
 //                Check for validity of turn (multiple moves)                //
 ///////////////////////////////////////////////////////////////////////////////
-bool Rules_Checker::validate_turn(Board &old_board, Board &new_board, std::string color){
+bool Rules_Checker::validate_turn(Board &old_board, Board &new_board, Color color){
   return !(moved_blockade_together(old_board, new_board) ||
            has_more_moves(new_board, color));
 
@@ -161,7 +161,7 @@ bool Rules_Checker::a_move_exists(Pawn p, int loc, bool home, Board &new_board){
   return false;
 }
 
-bool Rules_Checker::has_more_moves(Board &new_board, std::string color){
+bool Rules_Checker::has_more_moves(Board &new_board, Color color){
   auto posns = new_board.get_pawns_of_color(color);
 
   bool move_exists = false;

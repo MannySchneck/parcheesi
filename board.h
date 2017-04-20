@@ -20,15 +20,15 @@ class Board {
                         }
 
                         // TODO put these in an array
-                        starting_pos["blue"] = starting_pos_offset;
-                        starting_pos["yellow"] = starting_pos["blue"] + section_spacing;
-                        starting_pos["green"] = starting_pos["yellow"] + section_spacing;
-                        starting_pos["red"] = starting_pos["green"] + section_spacing;
+                        starting_pos[Color::blue] = starting_pos_offset;
+                        starting_pos[Color::yellow] = starting_pos[Color::blue] + section_spacing;
+                        starting_pos[Color::green] = starting_pos[Color::yellow] + section_spacing;
+                        starting_pos[Color::red] = starting_pos[Color::green] + section_spacing;
 
-                        final_ring["blue"] = 0; // board anchor
-                        final_ring["yellow"] = final_ring["blue"] + section_spacing;
-                        final_ring["green"] = final_ring["yellow"] + section_spacing;
-                        final_ring["red"] = final_ring["green"] + section_spacing;
+                        final_ring[Color::blue] = 0; // board anchor
+                        final_ring[Color::yellow] = final_ring[Color::blue] + section_spacing;
+                        final_ring[Color::green] = final_ring[Color::yellow] + section_spacing;
+                        final_ring[Color::red] = final_ring[Color::green] + section_spacing;
                 }
         /*********************************************************************/
         /*                             Interface                             */
@@ -36,8 +36,8 @@ class Board {
         using Posn = std::tuple<Pawn, int, bool>;
 
         std::vector<Pawn> get_pawns_at_pos(int pos);
-        std::vector<Pawn> get_pawns_at_pos(int pos, std::string);
-        std::vector<Posn> get_pawns_of_color(std::string);
+        std::vector<Pawn> get_pawns_at_pos(int pos,Color);
+        std::vector<Posn> get_pawns_of_color(Color);
 
         using Section = std::unordered_map<int, std::vector<Pawn>>;
 
@@ -62,7 +62,7 @@ class Board {
         bool valid_board_transition(Board b, std::pair<int, int> dice);
 
 
-        int get_color_start_space(std::string color){
+        int get_color_start_space(Color color){
                 return starting_pos[color];
         }
 
@@ -95,6 +95,6 @@ class Board {
         std::unordered_map<Color, int, enum_hash> starting_pos;
         std::unordered_map<Color, int, enum_hash> final_ring;
         using home_row_t = std::unordered_map<int, std::vector<Pawn>>;
-        std::unordered_map<Color, home_row_t> home_rows;
+        std::unordered_map<Color, home_row_t, enum_hash> home_rows;
         std::unordered_map<Color, int, enum_hash> pawn_reservoirs;
 };
