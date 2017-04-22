@@ -56,18 +56,30 @@ TEST_CASE("blockades"){
     REQUIRE(mv2->inspect(rc, board) == Status::cheated);
   }
 
-  // SECTION("can bop"){
-  //   board.put_pawn(p0, board.get_color_start_space(Color::blue) + 8);
+  SECTION("can bop"){
+    board.put_pawn(p0, board.get_color_start_space(Color::blue) + 8);
 
-  //   board.put_pawn(bp0, blue_start + 4);
+    board.put_pawn(bp0, blue_start + 4);
 
-  //   mv_ptr mv(new MoveMain(blue_start + 4, 4, bp0));
+    mv_ptr mv(new MoveMain(blue_start + 4, 4, bp0));
 
-  //   Rules_Checker rc2{{4}};
+    Rules_Checker rc2{{4}};
 
-  //   REQUIRE(mv->inspect(rc2, board) == Status::bop_bonus);
+    REQUIRE(mv->inspect(rc2, board) == Status::bop_bonus);
 
-  // }
+  }
+
+  SECTION("can bop entering"){
+          board.put_pawn(p0, blue_start);
+
+          mv_ptr mv(new EnterPiece(bp0));
+
+          Rules_Checker rc2{{5}};
+
+          REQUIRE(mv->inspect(rc2, board) == Status::bop_bonus);
+
+  }
+
 
   SECTION("pawn exists at start space"){
     board.put_pawn(p0, board.get_color_start_space(Color::blue) + 7);
@@ -155,7 +167,7 @@ TEST_CASE("blockades"){
     int start = board.get_color_start_space(bp0.color);
     mv_ptr mv(new EnterPiece(bp0));
     board.put_pawn(p0, start);
-    REQUIRE(mv->inspect(rc, board) == Status::normal);
+    REQUIRE(mv->inspect(rc, board) == Status::bop_bonus);
     board.put_pawn(p1, start);
     REQUIRE(mv->inspect(rc, board) == Status::cheated);
   }

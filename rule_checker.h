@@ -15,6 +15,7 @@ class Rules_Checker {
  public:
         Rules_Checker(fuel fuel);
 
+        bool did_bop(IMove*, Board &old_board);
 
         bool validate_main_move(MoveMain* move, Board &old_board);
 
@@ -24,12 +25,14 @@ class Rules_Checker {
 
         bool validate_turn(Board &old_board, Board &new_board, Color color);
 
+
+        bool is_boppable(std::vector<Pawn> pawns, Color c);
+
  private:
 #if TEST
  public:
 #endif
 
-        bool did_bop(IMove*, Board &old_board);
 
         bool start_blockaded(EnterPiece* mv, Board &old_board);
         bool encounters_blockade(Move* mv, Board &old_board);

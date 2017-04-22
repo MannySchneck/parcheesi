@@ -10,6 +10,7 @@ class IMove {
 public:
         //virtual Status update_board(Board &b) = 0;
         virtual Status inspect(Rules_Checker &rc, Board board) = 0;
+        virtual Status do_move(Board &board) = 0;
 protected:
         IMove();
 };
@@ -24,6 +25,8 @@ public:
 
         Status inspect(Rules_Checker &rc, Board board) override;
 
+        Status do_move(Board &board) override;
+
         Pawn get_pawn();
 private:
         Pawn pawn;
@@ -33,7 +36,7 @@ private:
 class Move : public IMove{
 public:
         Move(int start, int distance, Pawn pawn);
-
+        Status do_move(Board &board) override;
         Pawn get_pawn();
         int get_start();
         int get_distance();
