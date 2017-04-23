@@ -189,20 +189,42 @@ bool Rules_Checker::is_boppable(std::vector<Pawn> pawns, Color c){
 // @pre: check for blockades was run
 bool Rules_Checker::did_bop(IMove* mv, Board &old_board){
 
-  if(auto mm = dynamic_cast<MoveMain*>(mv)){
-          auto pawns = *(old_board.get_intermediate_spaces_main(mm->get_start(),
-                                                              mm->get_distance(),
-                                                              mm->get_pawn()).end() - 1);
+        if(auto mm = dynamic_cast<MoveMain*>(mv)){
+                auto pawns = *(old_board.get_intermediate_spaces_main(mm->get_start(),
+                                                                      mm->get_distance(),
+                                                                      mm->get_pawn()).end() - 1);
 
-          return is_boppable(pawns, mm->get_pawn().color);
-  }
+                return is_boppable(pawns, mm->get_pawn().color);
+        }
 
-  if(auto em = dynamic_cast<EnterPiece*>(mv)){
-          auto pawns = old_board.get_pawns_at_pos(old_board.
-                                                  get_color_start_space(em->get_pawn().
-                                                                        color));
-          return is_boppable(pawns, em->get_pawn().color);
-  }
+        if(auto em = dynamic_cast<EnterPiece*>(mv)){
+                auto pawns = old_board.get_pawns_at_pos(old_board.
+                                                        get_color_start_space(em->get_pawn().
+                                                                              color));
+                return is_boppable(pawns, em->get_pawn().color);
+        }
 
-  return false;
+        return false;
+}
+
+bool Rules_Checker::moved_home(Move* mv, Board &old_board){
+        if(auto mh = dynamic_cast<MoveHome*>(mv)){
+                return mh->get_start()+mh->get_distance() == 8;
+        }
+        else{
+                int into_hr;
+                int target_pos = mv->get_start() +  mv->get_distance();
+                int corner = old_board.final_ring[mv->get_pawn().color];
+                if(old_board.is_contains(mv->get_start(),
+                                         target_pos,
+                                         corner)){
+                        into_hr = modulo(target_pos - corner,
+                                         old_board.ring_spaces);
+
+                        return into_hr == 8;
+                }
+
+        }
+
+        return false;
 }

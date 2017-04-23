@@ -69,6 +69,9 @@ class Board {
         void put_pawn(Pawn p, int pos){
                 positions[pos].push_back(p);
         }
+
+
+        static const int ring_spaces = 68;
  private:
         // The board's 0 position is the blue color's
         // home row entry square
@@ -88,7 +91,6 @@ class Board {
         static const int safety_2_offset = 12;
         static const int starting_pos_offset = 5;
         static const int section_spacing = 17;
-        static const int ring_spaces = 68;
         static const int home_row_spaces = 7;
         std::unordered_set<int> safety_spaces;
         std::unordered_map<int, std::vector<Pawn>> positions;

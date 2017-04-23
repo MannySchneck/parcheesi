@@ -12,21 +12,7 @@ int Board::get_hr_spaces() const{
   return home_row_spaces;
 }
 
-std::vector<std::vector<Pawn>>
-Board::get_intermediate_spaces(int start,
-                               int distance,
-                               Pawn p,
-                               Section section){
 
-  std::vector<std::vector<Pawn>> spaces;
-  for(int i = 0; i <= distance; i++){
-    if(!(section.find(start + i % ring_spaces) == positions.end())){
-      spaces.push_back(section[start + i % ring_spaces]);
-    }
-  }
-
-  return spaces;
-}
 
 std::vector<Pawn> Board::get_pawns_at_pos(int pos) {
   return positions[pos];
@@ -55,6 +41,26 @@ std::vector<Pawn> Board::get_pawns_at_pos(int pos, Color color) {
   return home_rows[color][pos];
 }
 
+std::vector<std::vector<Pawn>>
+Board::get_intermediate_spaces(int start,
+                               int distance,
+                               Pawn p,
+                               Section section){
+
+
+
+        std::vector<std::vector<Pawn>> spaces;
+        for(int i = 0; i <= distance; i++){
+                if(section.count(start + i % ring_spaces)){
+                        spaces.push_back(section[start + i % ring_spaces]);
+                }
+        }
+
+
+        return spaces;
+}
+
+
 std::vector<Space> Board::get_intermediate_spaces_hr(int start, int distance, Pawn p) {
   return get_intermediate_spaces(start, distance, p, home_rows[p.color]);
 }
@@ -69,11 +75,15 @@ Board::get_intermediate_spaces_main(int start, int distance, Pawn p) {
     int num_up_to_hr = modulo(final_ring[p.color] - start, ring_spaces);
     int num_into_hr = modulo(final_pos - final_ring[p.color], ring_spaces);
 
-    auto st = get_intermediate_spaces(start, num_up_to_hr, p, positions).begin();
-    auto end = get_intermediate_spaces(start, num_up_to_hr, p, positions).end();
+    auto intermediates_main = get_intermediate_spaces(start, num_up_to_hr, p, positions);
+    auto st = intermediates_main.begin();
+    auto end = intermediates_main.end();
+
     spaces.insert(spaces.end(), st, end);
 
-    st = get_intermediate_spaces(0, num_into_hr, p, home_rows[p.color]).end();
+    auto intermediates_hr = get_intermediate_spaces(0, num_into_hr, p, home_rows[p.color]);
+    st = intermediates_hr.begin();
+    end = intermediates_hr.end();
     spaces.insert(spaces.end(), st, end);
 
     return spaces;

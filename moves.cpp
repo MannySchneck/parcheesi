@@ -14,6 +14,10 @@ Status MoveMain::inspect(Rules_Checker &rc, Board board){
                 return Status::bop_bonus;
         }
 
+        if(rc.moved_home(this, board)){
+                return Status::home_bonus;
+        }
+
         return Status::normal;
 }
 
@@ -42,7 +46,11 @@ Status MoveHome::inspect(Rules_Checker &rc, Board board){
         if(!rc.validate_home_move(this, board)){
                 return Status::cheated;
         }
+
+        if(rc.moved_home(this, board)) return Status::home_bonus;
+
         return Status::normal;
+
 }
 
 

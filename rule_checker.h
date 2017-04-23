@@ -17,6 +17,8 @@ class Rules_Checker {
 
         bool did_bop(IMove*, Board &old_board);
 
+        bool moved_home(Move*, Board&);
+
         bool validate_main_move(MoveMain* move, Board &old_board);
 
         bool validate_home_move(MoveHome* move, Board &old_board);
