@@ -6,9 +6,9 @@
 #include "game_params.h"
 
 
-Turn::Turn(Board old_board, Board cur_board, Color color, ::fuel fuel):
+Turn::Turn(Board old_board,  Color color, ::fuel fuel):
         old_board(old_board),
-        cur_board(cur_board),
+        cur_board(old_board),
         color(color),
         fuel(fuel){}
 

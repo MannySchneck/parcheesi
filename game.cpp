@@ -5,72 +5,34 @@
 #include <utility>
 #include <exception>
 #include "catch.hpp"
+#include "turn.h"
+#include "splayer.h"
 
-void Game::register_player(std::shared_ptr<IPlayer> p){
+void Game::register_player(S_Player p){
         players.push_back(p);
 }
 
-std::pair<int,int> Game::roll_dice(){
-        return std::pair<int, int>((rand() % 6) + 1, (rand() % 6) + 1);
+fuel Game::roll_dice(){
+        return fuel{(rand() % 6) + 1, (rand() % 6) + 1};
 }
 
 void Game::start(){
-        bool is_winner(false);
-        while(!is_winner){
+        Turn_Outcome outcome(Turn_Outcome::normal);
+        while(outcome != Turn_Outcome::victory){
+                int doubles_count = 0;
                 for(auto p : players){
-                        bool turn_done(false);
-                        Status status = Status::normal;
-
-                        std::pair<int,int> dice;
-                        std::pair<Status, Board> moves_result;
-
-                        while(!turn_done){
-                                std::vector<std::shared_ptr<IMove>> moves;
-
-                                switch(status){
-                                case (Status::normal):
-                                        dice = roll_dice();
-                                        moves = p->doMove(board, dice);
-                                        break;
-                                case (Status::bop_bonus):
-                                        moves = p->doMove(board, std::pair<int,int>(20,0));
-                                        break;
-                                case (Status::home_bonus):
-                                        moves = p->doMove(board, std::pair<int,int>(10,0));
-                                        break;
-                                }
-
-                                moves_result = process_moves(moves);
-
-                                switch(moves_result.first){
-                                case (Status::bop_bonus):
-                                        status = Status::bop_bonus;
-                                        break;
-                                case (Status::home_bonus):
-                                        status = Status::home_bonus;
-                                        break;
-                                case (Status::cheated):
-                                        status = Status::normal;
-                                        break;
-                                case (Status::normal):
-                                        board = moves_result.second;
-                                        turn_done = true;
-                                        break;
-                                default:
-                                        throw new std::logic_error("can't happen");
-                                }
+                        if(p.cheated){
+                                continue;
                         }
-                        board.valid_board_transition(moves_result.second, dice);
+                        do{
+                                fuel fuel = roll_dice();
+                                Turn turn(board, p.color, fuel);
+                                if((outcome = p.do_turn(turn)) == Turn_Outcome::victory)
+                                        goto out;
+                                doubles_count += Turn_Outcome::doubles == outcome ? 1 : 0;
+                        } while(outcome == Turn_Outcome::doubles);
                 }
+        out:
+                ;
         }
-}
-
-
-std::pair<Status, Board> Game::process_moves(std::vector<std::shared_ptr<IMove>> moves){
-        Board new_board = board;
-        Status status;
-        for(auto m : moves){
-                //status = m->update_board(new_board);
-        }
-        return std::pair<Status,Board> (status, new_board);
 }

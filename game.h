@@ -2,10 +2,11 @@
 
 #include "interfaces.h"
 #include "board.h"
+#include "splayer.h"
 
 class Game : IGame {
  public:
-        void register_player(std::shared_ptr<IPlayer> p) override;
+        void register_player(S_Player p) override;
 
         void start() override;
 
@@ -18,11 +19,11 @@ class Game : IGame {
 #endif
         int doubles_counter;
 
-        std::vector<std::shared_ptr<IPlayer>> players;
         Board board;
 
-        std::pair<int,int> roll_dice();
+        fuel roll_dice();
 
+        std::vector<S_Player> players;
 
         std::pair<Status, Board> process_moves(std::vector<std::shared_ptr<IMove>> moves);
 
