@@ -79,7 +79,6 @@ class Board {
         std::vector<std::vector<Pawn>>
                 get_intermediate_spaces(int start,
                                         int distance,
-                                        Pawn p,
                                         Section section);
 
 #ifdef TEST

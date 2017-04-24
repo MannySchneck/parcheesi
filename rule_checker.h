@@ -35,7 +35,6 @@ class Rules_Checker {
  public:
 #endif
 
-
         bool start_blockaded(EnterPiece* mv, Board &old_board);
         bool encounters_blockade(Move* mv, Board &old_board);
         bool tried_safety_bop(MoveMain* mv, Board &old_board);

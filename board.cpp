@@ -44,7 +44,6 @@ std::vector<Pawn> Board::get_pawns_at_pos(int pos, Color color) {
 std::vector<std::vector<Pawn>>
 Board::get_intermediate_spaces(int start,
                                int distance,
-                               Pawn p,
                                Section section){
 
 
@@ -62,7 +61,7 @@ Board::get_intermediate_spaces(int start,
 
 
 std::vector<Space> Board::get_intermediate_spaces_hr(int start, int distance, Pawn p) {
-  return get_intermediate_spaces(start, distance, p, home_rows[p.color]);
+  return get_intermediate_spaces(start, distance, home_rows[p.color]);
 }
 
 std::vector<std::vector<Pawn>>
@@ -75,13 +74,13 @@ Board::get_intermediate_spaces_main(int start, int distance, Pawn p) {
     int num_up_to_hr = modulo(final_ring[p.color] - start, ring_spaces);
     int num_into_hr = modulo(final_pos - final_ring[p.color], ring_spaces);
 
-    auto intermediates_main = get_intermediate_spaces(start, num_up_to_hr, p, positions);
+    auto intermediates_main = get_intermediate_spaces(start, num_up_to_hr,  positions);
     auto st = intermediates_main.begin();
     auto end = intermediates_main.end();
 
     spaces.insert(spaces.end(), st, end);
 
-    auto intermediates_hr = get_intermediate_spaces(0, num_into_hr, p, home_rows[p.color]);
+    auto intermediates_hr = get_intermediate_spaces(0, num_into_hr, home_rows[p.color]);
     st = intermediates_hr.begin();
     end = intermediates_hr.end();
     spaces.insert(spaces.end(), st, end);
@@ -89,7 +88,7 @@ Board::get_intermediate_spaces_main(int start, int distance, Pawn p) {
     return spaces;
   }
 
-  return get_intermediate_spaces(start, distance, p, positions);
+  return get_intermediate_spaces(start, distance, positions);
 }
 
 bool Board::is_safety_space(int pos) const{
