@@ -21,12 +21,15 @@ enum class Status {
         cheated
 };
 
+// Do NOT CHANGE ORDER.
 enum class Color {
-        red,
-                green,
-                blue,
-                yellow
+                blue = 0,
+                yellow = 1,
+                green = 2,
+                red = 3,
                 };
+
+
 
 struct enum_hash
 {
@@ -47,7 +50,7 @@ public:
         virtual void startGame(Color color) = 0;
 
         // ask the player what move they want to make
-        virtual std::vector<std::shared_ptr<IMove>> doMove(Board brd, std::pair<int, int> dice) = 0;
+        virtual std::vector<std::shared_ptr<IMove>> doMove(Board brd, fuel) = 0;
 
         // inform the player that they have suffered a doubles penalty
         virtual void DoublesPenalty() = 0;

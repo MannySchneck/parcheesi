@@ -11,7 +11,7 @@ enum class Turn_Outcome{
         doubles
 };
 
-class S_Player {
+class S_Player{
 public:
         S_Player(Color color, Board board);
 
@@ -21,6 +21,9 @@ public:
 
         Color color;
 private:
+        #ifdef TEST
+ public:
+        #endif
         std::shared_ptr<IPlayer> player;
         std::optional<Turn> turn;
 };

@@ -19,7 +19,7 @@ class Board {
                                 safety_spaces.insert(i * section_spacing + safety_2_offset);
                         }
 
-                        // TODO put these in an array
+                        // TODO put these in an array (Run awayy run awwaaaaayyyyy)
                         starting_pos[Color::blue] = starting_pos_offset;
                         starting_pos[Color::yellow] = starting_pos[Color::blue] + section_spacing;
                         starting_pos[Color::green] = starting_pos[Color::yellow] + section_spacing;
@@ -30,7 +30,10 @@ class Board {
                         final_ring[Color::green] = final_ring[Color::yellow] + section_spacing;
                         final_ring[Color::red] = final_ring[Color::green] + section_spacing;
 
-
+                        nest_count[Color::blue] = 4;
+                        nest_count[Color::yellow] = 4;
+                        nest_count[Color::green] = 4;
+                        nest_count[Color::red] = 4;
                 }
         /*********************************************************************/
         /*                             Interface                             */
@@ -40,6 +43,7 @@ class Board {
         std::vector<Pawn> get_pawns_at_pos(int pos);
         std::vector<Pawn> get_pawns_at_pos(int pos,Color);
         std::vector<Posn> get_pawns_of_color(Color);
+        int get_nest_count(Color color);
 
         using Section = std::unordered_map<int, std::vector<Pawn>>;
 
@@ -77,7 +81,6 @@ class Board {
  private:
         // The board's 0 position is the blue color's
         // home row entry square
-
         std::vector<std::vector<Pawn>>
                 get_intermediate_spaces(int start,
                                         int distance,

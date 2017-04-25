@@ -21,7 +21,7 @@ class Game : IGame {
 
         Board board;
 
-        fuel roll_dice();
+        fuel roll_dice(Color color, std::function<int()>);
 
         std::vector<S_Player> players;
 
