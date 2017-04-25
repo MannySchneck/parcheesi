@@ -13,9 +13,11 @@ enum class Turn_Outcome{
 
 class S_Player{
 public:
-        S_Player(Color color, Board board);
+        S_Player(Color color);
 
-        Turn_Outcome do_turn(Turn turn);
+        Turn_Outcome do_turn(Board board);
+
+        fuel roll_dice(Color, std::function<int()>, Board board);
 
         bool cheated;
 
