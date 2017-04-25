@@ -2,9 +2,15 @@
 #include "catch.hpp"
 #include <cstdlib>
 
-Turn_Outcome S_Player::do_turn(Board board){
+Turn_Outcome S_Player::do_turn(Board board, int doubles_count){
 
         fuel fuel = roll_dice(color, rand, board);
+
+        if(fuel[0] == fuel[1] && doubles_count == 2){
+                board.reset_farthest_pawn();
+                return Turn_Outcome::normal;
+        }
+
         Turn turn(board, color, fuel);
 
         return Turn_Outcome::normal;
@@ -31,14 +37,17 @@ TEST_CASE("Do a thing with dice"){
                 std::vector<int> mlerp{3,3,4,4};
                 //Add 1 to any input, to maintain compatibility with rand
                 //E.g. 2 becomes 3
-                REQUIRE(p.roll_dice(Color::red, []()->int{return 2;}, board) == mlerp);
+                REQUIRE(p.roll_dice(Color::red, []()->int{
+                                        return 2;
+                                },
+                                board) ==
+                        mlerp);
                 fuel blerp{3,4};
                 REQUIRE(p.roll_dice(Color::red, []()->
-                                         int{
-                                                 static int count = 2;
-                                                 return count++;
+                                    int{
+                                            static int count = 2;
+                                            return count++;
                                     }, board) ==
                         blerp);
         }
 }
-

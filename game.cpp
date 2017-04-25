@@ -22,7 +22,7 @@ void Game::start(){
                                 continue;
                         }
                         do{
-                                if((outcome = p.do_turn(board)) == Turn_Outcome::victory)
+                                if((outcome = p.do_turn(board, doubles_count)) == Turn_Outcome::victory)
                                         goto out;
                                 doubles_count += Turn_Outcome::doubles == outcome ? 1 : 0;
                         } while(outcome == Turn_Outcome::doubles);

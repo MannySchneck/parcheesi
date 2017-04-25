@@ -15,7 +15,7 @@ class S_Player{
 public:
         S_Player(Color color);
 
-        Turn_Outcome do_turn(Board board);
+        Turn_Outcome do_turn(Board board, int doubles_count);
 
         fuel roll_dice(Color, std::function<int()>, Board board);
 
