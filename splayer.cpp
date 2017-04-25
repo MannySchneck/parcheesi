@@ -6,6 +6,4 @@ Turn_Outcome S_Player::do_turn(Turn turn){
 
 S_Player::S_Player(Color color, Board board) :
         color(color),
-        turn(board),
-
-{}
+        turn(){}

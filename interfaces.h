@@ -11,6 +11,9 @@ using fuel = std::vector<int>;
 class Board;
 class IMove;
 
+class Turn;
+class S_Player;
+
 enum class Status {
         normal,
         bop_bonus,
@@ -53,7 +56,7 @@ public:
 
 class IGame {
         // add a player to the game
-        virtual void register_player(std::shared_ptr<IPlayer> p) = 0;
+        virtual void register_player(S_Player) = 0;
 
         // start a game
 

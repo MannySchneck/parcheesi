@@ -1,11 +1,11 @@
-CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp
+CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp
 CPP_OBJ_FILES := $(CPP_PROG_FILES:.cpp=.o)
 
 CPP_TEST_FILES :=  test/rules_tests.cpp
 
 TEST_MAIN_CPP := test/catch_main.cpp
 
-CC_FLAGS := --std=c++11 -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TEST
+CC_FLAGS := --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TEST
 
 CC := clang++
 

@@ -29,6 +29,8 @@ class Board {
                         final_ring[Color::yellow] = final_ring[Color::blue] + section_spacing;
                         final_ring[Color::green] = final_ring[Color::yellow] + section_spacing;
                         final_ring[Color::red] = final_ring[Color::green] + section_spacing;
+
+
                 }
         /*********************************************************************/
         /*                             Interface                             */
@@ -97,5 +99,5 @@ class Board {
         std::unordered_map<Color, int, enum_hash> final_ring;
         using home_row_t = std::unordered_map<int, std::vector<Pawn>>;
         std::unordered_map<Color, home_row_t, enum_hash> home_rows;
-        std::unordered_map<Color, int, enum_hash> pawn_reservoirs;
+        std::unordered_map<Color, int, enum_hash> nest_count;
 };

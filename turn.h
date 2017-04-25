@@ -1,3 +1,5 @@
+#pragma once
+
 #include "interfaces.h"
 #include "board.h"
 #include <memory>
@@ -5,6 +7,8 @@
 class Turn{
  public:
         Turn(Board old_board, Color color, fuel fuel);
+
+        Turn(Board old_board, Board new_board, Color color, fuel fuel);
 
         Status update_cur_board(std::shared_ptr<IMove> mv);
 

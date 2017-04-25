@@ -3,6 +3,7 @@
 #include "turn.h"
 #include "moves.h"
 #include "interfaces.h"
+#include <optional>
 
 enum class Turn_Outcome{
         normal,
@@ -21,5 +22,5 @@ public:
         Color color;
 private:
         std::shared_ptr<IPlayer> player;
-        Turn turn;
+        std::optional<Turn> turn;
 };

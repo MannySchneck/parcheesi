@@ -12,6 +12,13 @@ Turn::Turn(Board old_board,  Color color, ::fuel fuel):
         color(color),
         fuel(fuel){}
 
+Turn::Turn(Board old_board, Board new_board,  Color color, ::fuel fuel):
+        old_board(old_board),
+        cur_board(new_board),
+        color(color),
+        fuel(fuel){}
+
+
 Status Turn::update_cur_board(std::shared_ptr<IMove> mv){
         Rules_Checker rc{fuel};
         auto mv_result = mv->inspect(rc, old_board);
