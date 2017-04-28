@@ -14,6 +14,8 @@ class IMove;
 class Turn;
 class S_Player;
 
+
+
 enum class Status {
         normal,
         bop_bonus,
@@ -94,3 +96,5 @@ inline int modulo(int a, int b){
         const int result = a % b;
         return result >= 0 ? result : result + b;
 }
+
+using Posn = std::tuple<Pawn, int, bool>;

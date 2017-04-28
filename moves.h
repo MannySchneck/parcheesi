@@ -28,6 +28,8 @@ public:
         Status do_move(Board &board) override;
 
         Pawn get_pawn();
+
+        bool operator==(const EnterPiece& rhs);
 private:
         Pawn pawn;
         //Status update_board(Board &b) override;
@@ -40,6 +42,8 @@ public:
         Pawn get_pawn();
         int get_start();
         int get_distance();
+
+        bool operator==(const Move& rhs);
 private:
         Pawn pawn;
         int start;
@@ -55,6 +59,8 @@ public:
 
         Status inspect(Rules_Checker &rc, Board board) override;
         //Status update_board(Board &b) override;
+
+        bool operator==(const MoveMain& rhs);
 };
 
 // represents a move that starts on one of the home rows
@@ -64,5 +70,6 @@ public:
 
         Status inspect(Rules_Checker &rc, Board board) override;
 
+        bool operator==(const MoveHome& rhs);
         //Status update_board(Board &b) override;
 };

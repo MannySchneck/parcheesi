@@ -4,6 +4,7 @@
 #include <vector>
 #include "interfaces.h"
 #include <unordered_set>
+#include <optional>
 
 
 using Space = std::vector<Pawn>;
@@ -51,13 +52,20 @@ class Board {
         std::vector<Space> get_intermediate_spaces_hr(int start, int distance, Pawn p) ;
         std::unordered_set<int> get_blockades();
 
+        Status apply(std::shared_ptr<IMove>);
+
+        void reset_farthest_pawn(Color);
+        std::optional<Posn> get_farthest_pawn(Color color);
+        int pos_to_dist(int pos, Color color);
+
         bool is_safety_space(int pos) const;
         bool is_contains(int start, int end, int pos) const;
         bool is_blockade(int start, int dist);
         bool hr_is_blockade(int start, int dist, Pawn p);
         Status move_onto_hr(int start, int num_into_hr, Pawn p);
         Status move_pawn(int start, int dist, Pawn p);
-        void remove_pawn(int pos, Pawn p);
+        Status move_pawn_hr(int start, int distance, Pawn p);
+        void remove_pawn(int pos, Pawn p, Section &section);
         Status enter_pawn(Pawn p);
         Status try_bop(int pos, Pawn p, bool entering);
 

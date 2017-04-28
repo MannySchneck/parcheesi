@@ -3,6 +3,7 @@
 #include "moves.h"
 #include <cassert>
 #include <iostream>
+#include "prettyprint.hh"
 
 
 Rules_Checker::Rules_Checker(::fuel fuel):
@@ -124,7 +125,7 @@ bool Rules_Checker::start_blockaded(EnterPiece* mv, Board &old_board){
 ///////////////////////////////////////////////////////////////////////////////
 bool Rules_Checker::validate_turn(Board &old_board, Board &new_board, Color color){
         return !(moved_blockade_together(old_board, new_board)
-                 || has_more_moves(new_board, color));
+                 || has_more_moves(new_board, old_board, color));
 
 }
 
@@ -133,12 +134,17 @@ bool Rules_Checker::moved_blockade_together(Board &old_board, Board &new_board){
         std::unordered_set<int> original_blockades(old_board.get_blockades());
         std::unordered_set<int> new_blockades(new_board.get_blockades());
 
+
         for(auto blockade : new_blockades){
                 if(original_blockades.count(blockade) == 0){
-                        return true;
+                        for(auto pos : original_blockades){
+                                if(old_board.get_pawns_at_pos(pos) ==
+                                   new_board.get_pawns_at_pos(blockade)){
+                                        return true;
+                                }
+                        }
                 }
         }
-
         return false;
 }
 
@@ -151,20 +157,33 @@ enum posn_fields{
 bool Rules_Checker::a_move_exists(Pawn p,
                                   int loc,
                                   bool home,
-                                  Board &new_board){
+                                  Board new_board,
+                                  Board &old_board){
+
+        Board &check_board{new_board};
+
         for(auto gallon : fuel){
                 if(home){
-                        MoveHome mh(loc, gallon, p);
-                        if(mh.inspect(*this, new_board) != Status::cheated) return true;
+                        std::shared_ptr<IMove> mh{new MoveHome(loc, gallon, p)};
+                        if(mh->inspect(*this, check_board) != Status::cheated){
+                                check_board.apply(mh);
+                                return !moved_blockade_together(old_board, check_board);
+                        }
                 } else {
-                        MoveMain mm(loc, gallon, p);
-                        if(mm.inspect(*this, new_board) != Status::cheated) return true;
+                        std::shared_ptr<IMove> mm{new MoveMain(loc, gallon, p)};
+                        if(mm->inspect(*this, check_board) != Status::cheated){
+                                check_board.apply(mm);
+                                std::cout << "HWELP";
+                                std::cout << fuel;
+                                return !moved_blockade_together(old_board, check_board);
+                        }
                 }
         }
         return false;
 }
 
-bool Rules_Checker::has_more_moves(Board &new_board, Color color){
+bool Rules_Checker::has_more_moves(Board &new_board, Board &old_board, Color color){
+
         auto posns = new_board.get_pawns_of_color(color);
 
         bool move_exists = false;
@@ -175,7 +194,7 @@ bool Rules_Checker::has_more_moves(Board &new_board, Color color){
                 auto the_is_home = std::get<is_home>(posn);
 
                 move_exists = move_exists ||
-                        a_move_exists(the_pawn, the_loc, the_is_home, new_board);
+                        a_move_exists(the_pawn, the_loc, the_is_home, new_board, old_board);
         }
         return move_exists;
 }

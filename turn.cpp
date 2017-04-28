@@ -107,6 +107,25 @@ TEST_CASE("Turn tests"){
                 REQUIRE(turn1.validate() == false);
         }
 
+        SECTION("Would move blockade"){
+                Pawn p0(0, Color::blue);
+                Pawn p2(1, Color::blue);
+
+                Pawn rp0(0, Color::red);
+                Pawn rp1(1, Color::red);
+
+                old_board.put_pawn(p0, 5);
+                old_board.put_pawn(p2, 5);
+
+                bad_board.put_pawn(p0, 7);
+                bad_board.put_pawn(rp0, 8);
+                bad_board.put_pawn(rp1, 8);
+
+                Turn turn(old_board, bad_board, Color::blue, {2});
+
+                REQUIRE(turn.validate() == true);
+        }
+
         SECTION("removing fuel"){
                 Turn turn(old_board, bad_board, Color::red, {5});
 

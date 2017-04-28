@@ -21,8 +21,24 @@ Status MoveMain::inspect(Rules_Checker &rc, Board board){
         return Status::normal;
 }
 
+bool Move::operator==(const Move& rhs){
+        return start == rhs.start && distance == rhs.distance && pawn == rhs.pawn;
+}
+
+bool MoveMain::operator==(const MoveMain& rhs){
+        return Move::operator==(rhs);
+}
+
+bool MoveHome::operator==(const MoveHome& rhs){
+        return Move::operator==(rhs);
+}
+
 Status EnterPiece::do_move(Board &board){
         return board.enter_pawn(pawn);
+}
+
+bool EnterPiece::operator==(const EnterPiece& rhs){
+        return pawn == rhs.pawn;
 }
 
 Status EnterPiece::inspect(Rules_Checker &rc, Board board){

@@ -2,15 +2,15 @@
 #include "catch.hpp"
 #include <cstdlib>
 
+// Need to call do move somewhere.
 Turn_Outcome S_Player::do_turn(Board board, int doubles_count){
 
         fuel fuel = roll_dice(color, rand, board);
 
         if(fuel[0] == fuel[1] && doubles_count == 2){
-                board.reset_farthest_pawn();
+                board.reset_farthest_pawn(color);
                 return Turn_Outcome::normal;
         }
-
         Turn turn(board, color, fuel);
 
         return Turn_Outcome::normal;

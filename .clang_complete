@@ -1,3 +1,3 @@
--std=c++11
+-std=c++1z
 -D TEST
 -I./*.h

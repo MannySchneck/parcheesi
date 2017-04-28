@@ -4,10 +4,94 @@
 #include <iostream>
 #include <vector>
 #include <tuple>
+#include "moves.h"
+#include "prettyprint.hh"
+#include <exception>
 
 
 using Posn = std::tuple<Pawn, int, bool>;
 
+Status Board::apply(std::shared_ptr<IMove> mv){
+
+        Status status;
+
+        if(auto mm = dynamic_cast<MoveMain*>(mv.get())){
+                status = move_pawn(mm->get_start(),
+                                   mm->get_distance(),
+                                   mm->get_pawn());
+        } else if(auto mh = dynamic_cast<MoveHome*>(mv.get())){
+                status = move_pawn_hr(mh->get_start(),
+                                      mh->get_distance(),
+                                      mh->get_pawn());
+        } else if(auto me = dynamic_cast<EnterPiece*>(mv.get())){
+                status = enter_pawn(me->get_pawn());
+        } else {
+                throw std::logic_error("You added a new move type and forgot to change apply");
+        }
+
+        if(status == Status::cheated){
+                throw std::logic_error("Tried to apply an invalid move!\n"
+                                       "Dumbass.\n"
+                                       "Did you call the rules checker before applying the move????????");
+        }
+
+        return Status::normal;
+}
+
+enum posn_fields{
+        pawn,
+        loc,
+        is_home
+};
+
+
+int Board::pos_to_dist(int pos, Color color){
+        return modulo(pos - starting_pos[color], ring_spaces);
+}
+
+std::optional<Posn> Board::get_farthest_pawn(Color color){
+        auto posns = get_pawns_of_color(color);
+        if(posns.size() == 0){
+                return std::optional<Posn>(std::nullopt);
+        }
+
+        Posn farthest_posn = posns[0];
+
+        std::cout << std::endl;
+        for(auto posn : posns){
+                bool same_ring = std::get<is_home>(farthest_posn) == std::get<is_home>(posn);
+                bool index_greater = std::get<is_home>(posn) ? std::get<loc>(posn) > std::get<loc>(farthest_posn) :
+                        pos_to_dist(std::get<loc>(posn), color) > pos_to_dist(std::get<loc>(farthest_posn), color);
+                bool home_beats_ring = std::get<is_home>(posn) && !std::get<is_home>(farthest_posn);
+
+
+                if((same_ring && index_greater) || home_beats_ring){
+                        farthest_posn = posn;
+                }
+        }
+
+        return farthest_posn;
+}
+
+void Board::reset_farthest_pawn(Color color){
+
+        auto farthest_posn_maybe = get_farthest_pawn(color);
+
+        if(!farthest_posn_maybe.has_value()){
+                return;
+        }
+
+        Posn farthest_posn = farthest_posn_maybe.value();
+
+        auto the_pawn = std::get<pawn>(farthest_posn);
+
+
+        remove_pawn(std::get<loc>(farthest_posn),
+                    std::get<pawn>(farthest_posn),
+                    std::get<is_home>(farthest_posn) ? home_rows[the_pawn.color] : positions);
+
+        nest_count[the_pawn.color]++;
+}
 
 int Board::get_nest_count(Color color){
         return nest_count.at(color);
@@ -16,8 +100,6 @@ int Board::get_nest_count(Color color){
 int Board::get_hr_spaces() const{
         return home_row_spaces;
 }
-
-
 
 std::vector<Pawn> Board::get_pawns_at_pos(int pos) {
         return positions[pos];
@@ -50,8 +132,6 @@ std::vector<std::vector<Pawn>>
 Board::get_intermediate_spaces(int start,
                                int distance,
                                Section section){
-
-
 
         std::vector<std::vector<Pawn>> spaces;
         for(int i = 0; i <= distance; i++){
@@ -132,8 +212,28 @@ bool Board:: hr_is_blockade(int start, int dist, Pawn p){
         return false;
 }
 
+Status Board::move_pawn_hr(int start, int distance, Pawn p){
+        home_row_t &row = home_rows.at(p.color);
+
+        int target_pos = start + distance;
+
+        if(hr_is_blockade(start, target_pos, p)){
+                return Status::cheated;
+        }
+        if(start + distance == home_row_spaces){
+                return Status::home_bonus;
+        }
+
+        auto& space = row[start];
+        space.erase((space.begin()->id == p.id) ? space.begin() : std::next(space.begin()));
+
+        row[target_pos].push_back(p);
+        return Status::normal;
+}
+
+
 Status Board::move_onto_hr(int start, int num_into_hr, Pawn p){
-        remove_pawn(start, p);
+        remove_pawn(start, p, positions);
 
         if(hr_is_blockade(start, num_into_hr, p)){
                 return Status::cheated;
@@ -157,14 +257,15 @@ Status Board::move_pawn(int start, int dist, Pawn p){ // XXX
 
         if(is_blockade(start, dist))
                 return Status::cheated;
-        remove_pawn(start, p);
+        remove_pawn(start, p, positions);
         positions[final_pos].push_back(p);
         return try_bop(final_pos, p, false);
 }
 
-void Board::remove_pawn(int pos, Pawn p){
-        auto& space = positions[pos];
-        space.erase((space.begin()->id == p.id) ? space.begin() : space.begin()++);
+// pre: pawn must exist at pos. rules_checker will ensure this.
+void Board::remove_pawn(int pos, Pawn p, Section &section){
+        auto& space = section[pos];
+        space.erase((space.begin()->id == p.id) ? space.begin() : std::next(space.begin()));
 }
 
 
@@ -189,6 +290,7 @@ Status Board::try_bop(int pos, Pawn p, bool entering){
         if(positions[pos].size() != 2)
                 return Status::normal;
         if(positions[pos][0].color != p.color){
+                nest_count[positions[pos].begin()->color]++;
                 positions[pos].erase(positions[pos].begin());
                 return Status::bop_bonus;
         }
@@ -338,7 +440,13 @@ TEST_CASE("move_pawn", "test move to safety space"){
                 board.put_pawn(p0, board.get_color_start_space(Color::blue));
 
                 Pawn p1(0, Color::blue);
+
+                int thing = board.nest_count[p0.color];
+
+                int thingo = board.nest_count[p1.color];
                 REQUIRE(board.enter_pawn(p1) == Status::bop_bonus);
+                REQUIRE(board.nest_count[p1.color] == thingo - 1);
+                REQUIRE(board.nest_count[p0.color] == thing + 1);
 
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)][0] == p1);
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)].size() == 1);
@@ -378,5 +486,83 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
                 REQUIRE(std::find(pawns.begin(), pawns.end(), pos3) == pawns.end());
 
         }
+
+}
+
+std::ostream& operator<<(std::ostream& stream, const Pawn &p){
+        stream << "Pawn";
+        return stream;
+}
+
+TEST_CASE("moving on home row"){
+        Board board;
+        Pawn p0(0, Color::blue);
+
+        board.home_rows[Color::blue][2].push_back(p0);
+
+        REQUIRE(board.move_pawn_hr(2, 3, p0) == Status::normal);
+        REQUIRE(board.home_rows[p0.color][5].size() == 1);
+        REQUIRE(board.home_rows[p0.color][5][0] == p0);
+        REQUIRE(board.home_rows[p0.color][2].size() == 0);
+}
+
+TEST_CASE("reset_farthest pawn"){
+        Board board;
+
+        Pawn p0(0, Color::blue);
+        Pawn p1(1, Color::blue);
+        Pawn p2(2, Color::blue);
+
+        SECTION("home main"){
+                board.put_pawn(p0, 19);
+                board.put_pawn(p1, 60);
+
+
+                board.put_pawn(p2, board.final_ring[p0.color]);
+
+                board.move_pawn(board.final_ring[p0.color], 5, p2);
+
+                REQUIRE(board.get_pawns_at_pos(19).size() == 1);
+                REQUIRE(board.get_pawns_at_pos(60).size() == 1);
+                REQUIRE(board.home_rows[p0.color][5].size() == 1);
+
+                board.reset_farthest_pawn(p0.color);
+
+                REQUIRE(board.get_pawns_at_pos(19).size() == 1);
+                REQUIRE(board.get_pawns_at_pos(60).size() == 1);
+                REQUIRE(board.home_rows[p0.color][5].size() == 0);
+        }
+
+        SECTION("main main"){
+                board.put_pawn(p0, 19);
+                board.put_pawn(p1, 60);
+
+                REQUIRE(board.get_pawns_at_pos(19).size() == 1);
+                REQUIRE(board.get_pawns_at_pos(60).size() == 1);
+
+                board.reset_farthest_pawn(p0.color);
+
+                REQUIRE(board.get_pawns_at_pos(19).size() == 1);
+                REQUIRE(board.get_pawns_at_pos(60).size() == 0);
+
+        }
+
+        SECTION("home home"){
+
+                board.put_pawn(p1, board.final_ring[p0.color]);
+                board.move_pawn(board.final_ring[p0.color], 5, p1);
+
+                board.put_pawn(p2, board.final_ring[p0.color]);
+                board.move_pawn(board.final_ring[p0.color], 4, p2);
+
+                REQUIRE(board.home_rows[p0.color][4].size() == 1);
+                REQUIRE(board.home_rows[p0.color][5].size() == 1);
+
+                board.reset_farthest_pawn(p0.color);
+
+                REQUIRE(board.home_rows[p0.color][4].size() == 1);
+                REQUIRE(board.home_rows[p0.color][5].size() == 0);
+        }
+
 
 }
