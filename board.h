@@ -55,6 +55,7 @@ class Board {
         Status apply(std::shared_ptr<IMove>);
 
         void reset_farthest_pawn(Color);
+        std::vector<Posn> get_sorted_pawns(Color color, Direction dir);
         std::optional<Posn> get_farthest_pawn(Color color);
         int pos_to_dist(int pos, Color color);
 

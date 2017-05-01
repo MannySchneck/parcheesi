@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <ostream>
 
 
 using fuel = std::vector<int>;
@@ -15,22 +16,31 @@ class Turn;
 class S_Player;
 
 
+enum class Direction{
+        increasing,
+                decreasing
+                };
 
 enum class Status {
         normal,
-        bop_bonus,
-        home_bonus,
-        cheated
-};
+                bop_bonus,
+                home_bonus,
+                cheated
+                };
 
 // Do NOT CHANGE ORDER.
 enum class Color {
-                blue = 0,
+        blue = 0,
                 yellow = 1,
                 green = 2,
                 red = 3,
                 };
 
+enum posn_fields{
+        pawn,
+        loc,
+        is_home
+};
 
 
 struct enum_hash
@@ -46,7 +56,7 @@ struct enum_hash
 
 
 class IPlayer {
-public:
+ public:
         // inform the player that a game has started
         // and what color the player is.
         virtual void startGame(Color color) = 0;
@@ -58,7 +68,6 @@ public:
         virtual void DoublesPenalty() = 0;
 };
 
-
 class IGame {
         // add a player to the game
         virtual void register_player(S_Player) = 0;
@@ -69,7 +78,7 @@ class IGame {
 };
 
 class Pawn {
-public:
+ public:
         Pawn (int id, Color color) {
                 this->id=id;
                 this->color=color;
@@ -79,18 +88,20 @@ public:
 
         bool operator==(const Pawn &rhs) const{
                 return id == rhs.id &&
-                        color == rhs.color;
+                color == rhs.color;
         }
 
         bool operator!=(const Pawn &rhs) const{
                 return !(id == rhs.id &&
-                        color == rhs.color);
+                         color == rhs.color);
         }
 
         int /* 0-3 */ id;
         Color color;
 
 };
+
+
 
 inline int modulo(int a, int b){
         const int result = a % b;

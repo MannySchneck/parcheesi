@@ -7,7 +7,7 @@
 #include "moves.h"
 #include "prettyprint.hh"
 #include <exception>
-
+#include <algorithm>
 
 using Posn = std::tuple<Pawn, int, bool>;
 
@@ -38,15 +38,40 @@ Status Board::apply(std::shared_ptr<IMove> mv){
         return Status::normal;
 }
 
-enum posn_fields{
-        pawn,
-        loc,
-        is_home
-};
-
 
 int Board::pos_to_dist(int pos, Color color){
         return modulo(pos - starting_pos[color], ring_spaces);
+}
+
+
+std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
+        auto posns = get_pawns_of_color(color);
+        std::sort(std::begin(posns), std::end(posns),
+                  [this, dir, color](const Posn &fuck, const Posn &you){
+                          bool same_ring = std::get<is_home>(fuck) == std::get<is_home>(you);
+                          bool index_greater = std::get<is_home>(you) ? std::get<loc>(you) > std::get<loc>(fuck) :
+                                  pos_to_dist(std::get<loc>(you), color) > pos_to_dist(std::get<loc>(fuck), color);
+                          bool home_beats_ring = std::get<is_home>(you) && !std::get<is_home>(fuck);
+
+                          bool result;
+
+                          if(same_ring){
+                                  result = index_greater;
+                          }
+                          else{
+                                  result = home_beats_ring;
+                          }
+
+                          switch(dir){
+                          case(Direction::increasing):
+                                  return result;
+                          case(Direction::decreasing):
+                                  return !result;
+                          default:
+                                  throw std::logic_error("Fuck you. Shoulda used coq");
+                          }
+                  });
+        return posns;
 }
 
 std::optional<Posn> Board::get_farthest_pawn(Color color){
@@ -489,10 +514,6 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
 
 }
 
-std::ostream& operator<<(std::ostream& stream, const Pawn &p){
-        stream << "Pawn";
-        return stream;
-}
 
 TEST_CASE("moving on home row"){
         Board board;

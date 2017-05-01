@@ -18,6 +18,5 @@ class M_Player : IPlayer{
  protected:
         Color color;
 
-        virtual std::optional<Posn> select_pawn(Board board) = 0;
-        virtual std::optional<mv_ptr> construct_move(std::optional<Posn>, Board board, fuel fuel) = 0;
+        virtual std::optional<mv_ptr> construct_move(Board board, fuel fuel) = 0;
 };
