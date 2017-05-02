@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <ostream>
+#include <string>
 
 
 using fuel = std::vector<int>;
@@ -59,7 +60,7 @@ class IPlayer {
  public:
         // inform the player that a game has started
         // and what color the player is.
-        virtual void startGame(Color color) = 0;
+        virtual std::string startGame(Color color) = 0;
 
         // ask the player what move they want to make
         virtual std::vector<std::shared_ptr<IMove>> doMove(Board brd, fuel) = 0;
@@ -101,7 +102,7 @@ class Pawn {
 
 };
 
-
+std::ostream& operator<<(std::ostream& os, const Pawn& p);
 
 inline int modulo(int a, int b){
         const int result = a % b;

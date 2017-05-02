@@ -14,6 +14,9 @@ class Turn{
 
         bool validate();
 
+        Board get_old_board();
+        Board get_new_board();
+
         void add_gas(int gallons);
         void guzzle_gas(int gallons);
  private:

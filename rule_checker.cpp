@@ -148,12 +148,6 @@ bool Rules_Checker::moved_blockade_together(Board &old_board, Board &new_board){
         return false;
 }
 
-enum posn_fields{
-        pawn,
-        loc,
-        is_home
-};
-
 bool Rules_Checker::a_move_exists(Pawn p,
                                   int loc,
                                   bool home,
@@ -173,8 +167,6 @@ bool Rules_Checker::a_move_exists(Pawn p,
                         std::shared_ptr<IMove> mm{new MoveMain(loc, gallon, p)};
                         if(mm->inspect(*this, check_board) != Status::cheated){
                                 check_board.apply(mm);
-                                std::cout << "HWELP";
-                                std::cout << fuel;
                                 return !moved_blockade_together(old_board, check_board);
                         }
                 }

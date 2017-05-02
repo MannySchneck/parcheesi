@@ -1,20 +1,25 @@
 #include "mplayer.h"
 #include <optional>
+#include <algorithm>
+#include <string>
+#include <set>
 
-void M_Player::startGame(Color color){
+std::string M_Player::startGame(Color color){
         this->color = color;
+        return "a machine player =)";
 }
 
 std::vector<mv_ptr> M_Player::doMove(Board board, fuel fuel){
-        bool out_of_pawns;
-        while(!out_of_pawns){
-                auto mv = construct_move(board, fuel);
-                if(mv.has_value()){
-                        return {mv.value()};
-                }
+        std::vector<mv_ptr> moves;
+        std::optional<mv_ptr> mv;
+
+        turn = Turn(board, color, fuel);
+        while((mv = construct_move(board, fuel))){
+                turn->update_cur_board(mv.value());
+                moves.push_back(mv.value());
         }
 
-        return std::vector<mv_ptr>{};
+        return moves;
 }
 
 void M_Player::DoublesPenalty(){

@@ -1,4 +1,4 @@
-CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp firstplayer.cpp
+CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp dumb_player.cpp interfaces.cpp
 CPP_OBJ_FILES := $(CPP_PROG_FILES:.cpp=.o)
 
 CPP_TEST_FILES :=  test/rules_tests.cpp
@@ -9,8 +9,8 @@ CC_FLAGS := --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TE
 
 CC_FLAGS +=  -stdlib=libc++ -nostdinc++ \
           -I/usr/local/Cellar/llvm/HEAD-fdcdb2a/include/c++/v1 \
-          -L/usr/local/Cellar/llvm/HEAD-fdcdb2a/lib \
-          -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib
+		      -L/usr/local/Cellar/llvm/HEAD-fdcdb2a/lib \
+	        -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib
 
 CC := clang++
 
@@ -30,5 +30,5 @@ program:
 	$(CC) $(CC_FLAGS) $(CPP_FILES)
 
 clean:
-	rm -rf bin/* bin/*.o
+	rm -rf bin/* bin/*.	o
 

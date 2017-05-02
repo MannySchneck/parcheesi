@@ -1,2 +1,0 @@
-* TODO make dice class
-* TODO refactor positions into polymorphic classes

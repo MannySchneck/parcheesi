@@ -1,23 +1,37 @@
 #include "splayer.h"
 #include "catch.hpp"
+#include "turn.h"
 #include <cstdlib>
 
 // Need to call do move somewhere.
-Turn_Outcome S_Player::do_turn(Board board, int doubles_count){
+std::pair<Turn_Outcome, Board> S_Player::do_turn(Board board, int doubles_count){
 
         fuel fuel = roll_dice(color, rand, board);
 
         if(fuel[0] == fuel[1] && doubles_count == 2){
                 board.reset_farthest_pawn(color);
-                return Turn_Outcome::normal;
+                return std::pair<Turn_Outcome, Board>{Turn_Outcome::normal, board};
         }
         Turn turn(board, color, fuel);
 
-        return Turn_Outcome::normal;
+        auto moves = player->doMove(board, fuel); // actually does turn
+
+        for(auto move : moves){
+                if(turn.update_cur_board(move) == Status::cheated){
+                        // TODO: kick out of game
+                        return std::pair<Turn_Outcome, Board>
+                                {Turn_Outcome::cheated, turn.get_old_board()};
+                }
+        }
+
+        return turn.validate() ?
+                std::pair<Turn_Outcome, Board>{Turn_Outcome::normal, turn.get_new_board()} :
+        std::pair<Turn_Outcome, Board>{Turn_Outcome::cheated, turn.get_old_board()};
 }
 
+
 S_Player::S_Player(Color color) :
-        color(color) {}
+        color(color){}
 
 fuel S_Player::roll_dice(Color color, std::function<int()> die, Board board){
         fuel fuel{(die() % 6) + 1, (die() % 6) + 1};

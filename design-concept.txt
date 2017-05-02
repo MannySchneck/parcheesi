@@ -1,21 +1,19 @@
-Basic Gameplay:
+-*- mode: compilation; default-directory: "~/395/hw3/" -*-
+Compilation started at Tue May  2 17:10:15
 
-This repository implements Parcheesi. 4 players meet around a board. Each player gets 4 pawns, all of which start in the player's respective home circle. The players take turns rolling dice one by one. A player may enter a pawn to the space adjacent to the home circle only with a die roll of 5. Once a pawn is on the board, the player may advance each pawn by the number on a each respective die.
+make tests
+clang++ --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TEST -stdlib=libc++ -nostdinc++ -I/usr/local/Cellar/llvm/HEAD-fdcdb2a/include/c++/v1 -L/usr/local/Cellar/llvm/HEAD-fdcdb2a/lib -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib test/rules_tests.cpp bin/test_main.o board.o game.o moves.o rule_checker.o turn.o splayer.o mplayer.o dumb_player.o interfaces.o -o test.bin
+Undefined symbols for architecture x86_64:
+  "Move::inspect(Rules_Checker&, Board)", referenced from:
+      vtable for Move in moves.o
+  "MoveHome::operator==(MoveHome const&)", referenced from:
+      Catch::Internal::Evaluator<MoveHome, MoveHome, (Catch::Internal::Operator)0>::evaluate(MoveHome const&, MoveHome const&) in dumb_player.o
+  "MoveMain::operator==(MoveMain const&)", referenced from:
+      Catch::Internal::Evaluator<MoveMain, MoveMain, (Catch::Internal::Operator)0>::evaluate(MoveMain const&, MoveMain const&) in dumb_player.o
+  "MoveMain::operator==(MoveMain const&) const", referenced from:
+      MoveMain::operator==(std::__1::shared_ptr<IMove>) const in moves.o
+ld: symbol(s) not found for architecture x86_64
+clang-5.0: error: linker command failed with exit code 1 (use -v to see invocation)
+make: *** [tests] Error 1
 
-Objective:
-
-The basic objective is to advance your pawns all the around the board. Once a pawn has moved in a full cycle around the board, it enters a player's home row - a safe row of squares where only the player's pawns may enter. From here, a player must move a pawn into its home by an exact number of spaces.
-
-Special cases:
-
-	Blockade: Any space on the board may contain a maximum of two pawns of the same color. This forms a blockade. No pawn may advance onto or past a blockade.
-
-	Bop: Advancing a pawn onto a space occupied by another pawn results in a bop. The pawn previously on the square returns to its starting square, and the player who moved the pawn onto the square may move any individual pawn in play by 20 spaces.
-
-	Home bonus: Upon moving a pawn home, a player may move any additional pawn in play by 10 spaces.
-
-	Safety: Specific pieces on the board are colored purple and designated as safety squares. Any pawn located on a safety square can only be bopped if the bopping pawn is entering the board.
-
-	Double bonus: If a player rolls doubles, that player gets another roll
-
-	Double repeats: If a player rolls doubles three times in a row, that player's turn immediately ends and their furthest pawn must be returned to the starting circle.
+Compilation exited abnormally with code 2 at Tue May  2 17:10:18

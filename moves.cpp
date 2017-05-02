@@ -1,8 +1,17 @@
 #include "interfaces.h"
 #include "moves.h"
+#include <typeinfo>
 
 Status Move::do_move(Board &board){
         return board.move_pawn(start, distance, pawn);
+}
+
+int Move::get_cost() const{
+        return distance;
+}
+
+int EnterPiece::get_cost() const{
+        return 5; // FUCK
 }
 
 Status MoveMain::inspect(Rules_Checker &rc, Board board){
@@ -21,23 +30,69 @@ Status MoveMain::inspect(Rules_Checker &rc, Board board){
         return Status::normal;
 }
 
-bool Move::operator==(const Move& rhs){
+
+
+bool Move::operator==(const Move& rhs) const{
         return start == rhs.start && distance == rhs.distance && pawn == rhs.pawn;
 }
 
-bool MoveMain::operator==(const MoveMain& rhs){
+std::ostream& operator<<(std::ostream &out, const Move &mv){
+        out << "(move ";
+        out << mv.start << " ";
+        out << mv.distance << " ";
+        out << mv.pawn;
+        out << ")";
+        return out;
+}
+
+bool MoveMain::operator==(const MoveMain& rhs) const{
         return Move::operator==(rhs);
 }
 
-bool MoveHome::operator==(const MoveHome& rhs){
+bool MoveMain::operator==(const  std::shared_ptr<IMove> rhs) const{
+        const MoveMain* m;
+        if((m = dynamic_cast<const MoveMain*>(rhs.get()))){
+                return *this == *m;
+        }
+        return false;
+}
+bool MoveMain::operator!=(const  std::shared_ptr<IMove> rhs) const{
+        return !(*this == rhs);
+}
+
+bool MoveHome::operator==(const MoveHome& rhs) const{
         return Move::operator==(rhs);
 }
+
+bool MoveHome::operator==(const  std::shared_ptr<IMove> rhs) const{
+        const MoveHome* m;
+        if((m = dynamic_cast<const MoveHome*>(rhs.get()))){
+                return *this == *m;
+        }
+        return false;
+}
+bool MoveHome::operator!=(const  std::shared_ptr<IMove> rhs) const{
+        return !(*this == rhs);
+}
+
+
 
 Status EnterPiece::do_move(Board &board){
         return board.enter_pawn(pawn);
 }
 
-bool EnterPiece::operator==(const EnterPiece& rhs){
+bool EnterPiece::operator==(const  std::shared_ptr<IMove> rhs) const{
+        const EnterPiece* m;
+        if((m = dynamic_cast<const EnterPiece*>(rhs.get()))){
+                return *this == *m;
+        }
+        return false;
+}
+bool EnterPiece::operator!=(const  std::shared_ptr<IMove> rhs) const{
+        return !(*this == rhs);
+}
+
+bool EnterPiece::operator==(const EnterPiece& rhs) const{
         return pawn == rhs.pawn;
 }
 

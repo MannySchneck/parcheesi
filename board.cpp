@@ -64,9 +64,9 @@ std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
 
                           switch(dir){
                           case(Direction::increasing):
-                                  return result;
-                          case(Direction::decreasing):
                                   return !result;
+                          case(Direction::decreasing):
+                                  return result;
                           default:
                                   throw std::logic_error("Fuck you. Shoulda used coq");
                           }

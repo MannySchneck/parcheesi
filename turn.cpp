@@ -18,20 +18,30 @@ Turn::Turn(Board old_board, Board new_board,  Color color, ::fuel fuel):
         color(color),
         fuel(fuel){}
 
+Board Turn::get_old_board(){
+        return old_board;
+}
+Board Turn::get_new_board(){
+        return cur_board;
+}
 
-Status Turn::update_cur_board(std::shared_ptr<IMove> mv){
+
+Status Turn::update_cur_board(mv_ptr mv){
         Rules_Checker rc{fuel};
         auto mv_result = mv->inspect(rc, old_board);
 
         switch(mv_result){
         case(Status::normal):
+                guzzle_gas(mv->get_cost());
                 return mv->do_move(cur_board);
                 break;
         case(Status::bop_bonus):
+                guzzle_gas(mv->get_cost());
                 fuel.push_back(game_params::bop_bonus);
                 return mv->do_move(cur_board);
                 break;
         case(Status::home_bonus):
+                guzzle_gas(mv->get_cost());
                 fuel.push_back(game_params::home_bonus);
                 return mv->do_move(cur_board);
                 break;
