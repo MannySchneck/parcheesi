@@ -13,8 +13,8 @@ class IMove {
 
         virtual int get_cost() const = 0;
 
-        virtual bool operator==(const  std::shared_ptr<IMove> rhs) const = 0;
-        virtual bool operator!=(const  std::shared_ptr<IMove> rhs) const = 0;
+        virtual bool operator==(const  std::shared_ptr<IMove> rhs)= 0;
+        virtual bool operator!=(const  std::shared_ptr<IMove> rhs)= 0;
  protected:
         IMove();
 };
@@ -35,10 +35,10 @@ class EnterPiece : public IMove{
 
         int get_cost() const override;
 
-        virtual bool operator==(const  std::shared_ptr<IMove> rhs) const override;
-        virtual bool operator!=(const  std::shared_ptr<IMove> rhs) const override;
+        virtual bool operator==(const  std::shared_ptr<IMove> rhs)override;
+        virtual bool operator!=(const  std::shared_ptr<IMove> rhs)override;
 
-        bool operator==(const EnterPiece& rhs) const;
+        bool operator==(const EnterPiece& rhs);
  private:
         Pawn pawn;
         //Status update_board(Board &b) override;
@@ -54,7 +54,7 @@ class Move : public IMove{
 
         int get_cost() const override;
 
-        bool operator==(const Move& rhs) const;
+        bool operator==(const Move& rhs) ;
 
         friend std::ostream& operator<<(std::ostream &out, const Move &mv);
  private:
@@ -73,9 +73,9 @@ class MoveMain : public Move{
         Status inspect(Rules_Checker &rc, Board board) override;
         //Status update_board(Board &b) override;
 
-        virtual bool operator==(const  std::shared_ptr<IMove> rhs) const override;
-        virtual bool operator!=(const  std::shared_ptr<IMove> rhs) const override;
-        bool operator==(const MoveMain& rhs) const;
+        virtual bool operator==(const  std::shared_ptr<IMove> rhs) override;
+        virtual bool operator!=(const  std::shared_ptr<IMove> rhs) override;
+        bool operator==(const MoveMain& rhs) ;
 };
 
 // represents a move that starts on one of the home rows
@@ -85,9 +85,9 @@ class MoveHome : public Move{
 
         Status inspect(Rules_Checker &rc, Board board) override;
 
-        virtual bool operator==(const  std::shared_ptr<IMove> rhs) const override;
-        virtual bool operator!=(const  std::shared_ptr<IMove> rhs) const override;
+        virtual bool operator==(const  std::shared_ptr<IMove> rhs) override;
+        virtual bool operator!=(const  std::shared_ptr<IMove> rhs) override;
 
 
-        bool operator==(const MoveHome& rhs) const;
+        bool operator==(const MoveHome& rhs) ;
 };
