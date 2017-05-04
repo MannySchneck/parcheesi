@@ -146,7 +146,7 @@ TEST_CASE("Make a thing to do a thing") {
                 mv_ptr mv{new MoveMain{red_start + 1, 2, p0}};
 
                 REQUIRE(*(std::dynamic_pointer_cast<MoveMain>(pl1.construct_move(board, fuel, {}).value()))  ==
-                        *(std::dynamic_pointer_cast<MoveMain>(mv)));
+                        mv);
         }
 
         SECTION("making sure that bad move set prevents moves being called"){
@@ -155,11 +155,20 @@ TEST_CASE("Make a thing to do a thing") {
                 board.put_pawn(p0, red_start + 1);
                 board.put_pawn(p1, red_start - 1);
 
+                board.put_pawn(bp0, red_start + 3);
+                board.put_pawn(bp1, red_start + 3);
+
                 fuel fuel{2, 6};
 
                 mv_ptr mv{new MoveMain{red_start + 1, 2, p0}};
 
+
                 REQUIRE(*(std::dynamic_pointer_cast<MoveMain>(pl1.construct_move(board, fuel, {mv}).value())) !=
-                        *(std::dynamic_pointer_cast<MoveMain>(mv)));
+                        mv);
+        }
+
+        SECTION("can't move a blockade"){
+                Dumb_Player pl1(Color::red, Direction::decreasing);
+                //TODO: WOOT
         }
 }

@@ -1,4 +1,4 @@
-CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp dumb_player.cpp interfaces.cpp
+CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp dumb_player.cpp interfaces.cpp parser.cpp
 CPP_OBJ_FILES := $(CPP_PROG_FILES:.cpp=.o)
 
 CPP_TEST_FILES :=  test/rules_tests.cpp
@@ -9,6 +9,8 @@ CC_FLAGS := --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TE
 
 CC_FLAGS +=  -stdlib=libc++ -nostdinc++ \
           -I/usr/local/Cellar/llvm/HEAD-fdcdb2a/include/c++/v1 \
+					-Ilib/boost_1_64_0 \
+					-Ilib/PEGTL/include/tao \
 		      -L/usr/local/Cellar/llvm/HEAD-fdcdb2a/lib \
 	        -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib
 

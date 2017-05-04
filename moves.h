@@ -75,7 +75,7 @@ class MoveMain : public Move{
 
         virtual bool operator==(const  std::shared_ptr<IMove> rhs) override;
         virtual bool operator!=(const  std::shared_ptr<IMove> rhs) override;
-        bool operator==(const MoveMain& rhs) ;
+        bool operator==(const MoveMain& rhs);
 };
 
 // represents a move that starts on one of the home rows
