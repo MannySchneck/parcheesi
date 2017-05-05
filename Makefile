@@ -1,4 +1,4 @@
-CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp dumb_player.cpp interfaces.cpp parser.cpp
+CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp dumb_player.cpp interfaces.cpp parser.cpp arg_wrapper_classes.cpp
 CPP_OBJ_FILES := $(CPP_PROG_FILES:.cpp=.o)
 
 CPP_TEST_FILES :=  test/rules_tests.cpp
@@ -32,5 +32,4 @@ program:
 	$(CC) $(CC_FLAGS) $(CPP_FILES)
 
 clean:
-	rm -rf bin/* bin/*.	o
-
+	rm -rf bin/* bin/*.	*.o *.bin

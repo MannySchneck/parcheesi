@@ -5,3 +5,4 @@
 *.profraw
 /.DS_Store
 /TAGS
+/lib

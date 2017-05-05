@@ -11,14 +11,17 @@ std::string M_Player::startGame(Color color){
 
 std::vector<mv_ptr> M_Player::doMove(Board board, fuel fuel){
         std::vector<mv_ptr> moves;
+        std::vector<mv_ptr> bad_moves;
         std::optional<mv_ptr> mv;
 
         turn = Turn(board, color, fuel);
-        while((mv = construct_move(board, fuel))){
-                turn->update_cur_board(mv.value());
-                moves.push_back(mv.value());
+        while((mv = construct_move(board, fuel, bad_moves))){
+                if(Status::cheated  == turn->update_cur_board(mv.value())){
+                        bad_moves.push_back(mv.value());
+                } else{
+                        moves.push_back(mv.value());
+                }
         }
-
         return moves;
 }
 

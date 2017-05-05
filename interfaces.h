@@ -16,6 +16,10 @@ class IMove;
 class Turn;
 class S_Player;
 
+class Serializable{
+ public:
+        virtual std::string serialize() const = 0;
+};
 
 enum class Direction{
         increasing,
@@ -78,7 +82,8 @@ class IGame {
         virtual void start() = 0;
 };
 
-class Pawn {
+class Pawn :
+Serializable{
  public:
         Pawn (int id, Color color) {
                 this->id=id;
@@ -96,6 +101,8 @@ class Pawn {
                 return !(id == rhs.id &&
                          color == rhs.color);
         }
+
+        std::string serialize() const override;
 
         int /* 0-3 */ id;
         Color color;

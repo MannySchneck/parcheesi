@@ -7,3 +7,7 @@ std::ostream& operator<<(std::ostream& os, const Pawn& p)
         os << ")";
         return os;
 }
+
+std::string Pawn::serialize() const{
+        return "ACK!";
+}
