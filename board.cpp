@@ -9,6 +9,8 @@
 #include <exception>
 #include <algorithm>
 
+#include <sstream>
+
 using Posn = std::tuple<Pawn, int, bool>;
 
 Status Board::apply(std::shared_ptr<IMove> mv){
@@ -82,7 +84,6 @@ std::optional<Posn> Board::get_farthest_pawn(Color color){
 
         Posn farthest_posn = posns[0];
 
-        std::cout << std::endl;
         for(auto posn : posns){
                 bool same_ring = std::get<is_home>(farthest_posn) == std::get<is_home>(posn);
                 bool index_greater = std::get<is_home>(posn) ? std::get<loc>(posn) > std::get<loc>(farthest_posn) :
@@ -336,9 +337,25 @@ std::unordered_set<int> Board::get_blockades(){
         return original_blockades;
 }
 
+std::string Board::serialize() const{
+        std::stringstream ss;
+
+        ss << "<board> ";
+        ss << "<start> ";
+        ss << "</start> ";
+        ss << "<main> ";
+        ss << "</main> ";
+        ss << "<home-rows> ";
+        ss << "</home-rows> ";
+        ss << "<home> ";
+        ss << "</home> ";
+        ss << "</board>";
+
+        return ss.str();
+}
+
 TEST_CASE("Enter Pawn", "[Enter Pawn]") {
         Board board;
-
 
         SECTION("Color::red"){
                 Pawn p(0, Color::red);

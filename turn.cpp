@@ -139,7 +139,6 @@ TEST_CASE("Turn tests"){
         SECTION("removing fuel"){
                 Turn turn(old_board, bad_board, Color::red, {5});
 
-                std::cerr << turn.fuel.size();
 
                 turn.guzzle_gas(5);
 

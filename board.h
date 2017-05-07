@@ -9,7 +9,9 @@
 
 using Space = std::vector<Pawn>;
 
-class Board {
+class Board :
+        public Serializable
+{
  public:
         Board()
                 {
@@ -40,6 +42,9 @@ class Board {
         /*                             Interface                             */
         /*********************************************************************/
         using Posn = std::tuple<Pawn, int, bool>;
+
+
+        std::string serialize() const override;
 
         std::vector<Pawn> get_pawns_at_pos(int pos);
         std::vector<Pawn> get_pawns_at_pos(int pos,Color);

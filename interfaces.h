@@ -10,6 +10,9 @@
 
 using fuel = std::vector<int>;
 
+std::string serialize(fuel fuel);
+
+
 class Board;
 class IMove;
 
