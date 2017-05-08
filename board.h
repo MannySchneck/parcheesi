@@ -45,6 +45,7 @@ class Board :
 
 
         std::string serialize() const override;
+        std::string serialize_start() const;
 
         std::vector<Pawn> get_pawns_at_pos(int pos);
         std::vector<Pawn> get_pawns_at_pos(int pos,Color);

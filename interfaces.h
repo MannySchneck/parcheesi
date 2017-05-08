@@ -42,6 +42,8 @@ enum class Color {
                 yellow = 1,
                 green = 2,
                 red = 3,
+                First = blue,
+                Last = red
                 };
 
 enum posn_fields{

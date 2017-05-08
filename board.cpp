@@ -341,17 +341,38 @@ std::string Board::serialize() const{
         std::stringstream ss;
 
         ss << "<board> ";
+        
         ss << "<start> ";
+        ss << serialize_start();
         ss << "</start> ";
+
         ss << "<main> ";
         ss << "</main> ";
+
         ss << "<home-rows> ";
         ss << "</home-rows> ";
+
         ss << "<home> ";
         ss << "</home> ";
+
         ss << "</board>";
 
         return ss.str();
+}
+
+std::string Board::serialize_start() const{
+        auto nest_pawns = get_all_nest_pawns;
+        std::stringstream ss;
+
+        for(Color color = Color::First; color != Color::Last; ++c) {
+                for(int i = nest_count[color]; i >= 0; --i){
+                        ss << "<color> ";
+                        ss << std::to_string(i);
+                        ss << "</color>";
+                                }
+        }
+
+        return ss;
 }
 
 TEST_CASE("Enter Pawn", "[Enter Pawn]") {
