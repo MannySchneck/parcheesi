@@ -111,10 +111,12 @@ class Board :
         static const int section_spacing = 17;
         static const int home_row_spaces = 7;
         std::unordered_set<int> safety_spaces;
-        std::unordered_map<int, std::vector<Pawn>> positions;
         std::unordered_map<Color, int, enum_hash> starting_pos;
         std::unordered_map<Color, int, enum_hash> final_ring;
         using home_row_t = std::unordered_map<int, std::vector<Pawn>>;
+
+        std::unordered_map<int, std::vector<Pawn>> positions;
         std::unordered_map<Color, home_row_t, enum_hash> home_rows;
+
         std::unordered_map<Color, int, enum_hash> nest_count;
 };

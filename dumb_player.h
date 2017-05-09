@@ -20,3 +20,4 @@ class Dumb_Player : M_Player{
         std::optional<mv_ptr> construct_move(Board board, fuel fuel,  std::vector<mv_ptr> bad_moves) override;
 
 };
+

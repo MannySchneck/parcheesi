@@ -10,15 +10,16 @@ Dumb_Player::Dumb_Player(Color color, Direction direction) :
         color(color),
         direction(direction) {}
 
-
-
 std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::vector<mv_ptr> bad_moves){
 
         auto posns = board.get_sorted_pawns(color, direction);
 
-        if(std::find(fuel.begin(), fuel.end(), 5) != fuel.end()
-           && board.get_nest_count(color)){
-                return mv_ptr{new EnterPiece(Pawn(board.get_nest_count(color) - 1, color))};
+        // *WRONG*
+        if(direction == Direction::increasing){
+                if(std::find(fuel.begin(), fuel.end(), 5) != fuel.end()
+                   && board.get_nest_count(color)){
+                        return mv_ptr{new EnterPiece(Pawn(board.get_nest_count(color) - 1, color))};
+                }
         }
 
         if(posns.size() == 0){
@@ -31,38 +32,24 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                 auto the_pawn = std::get<pawn>(posn);
 
 
-                if(the_is_home){
-                        for(auto gallon : fuel){
-                                auto mv = mv_ptr{new MoveHome(the_loc, gallon, the_pawn)};
 
-                                if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
-                                    std::end(bad_moves)){
-                                        continue;
-                                }
+                for (auto gallon : fuel){
+                        auto mv = the_is_home ? mv_ptr{new MoveHome(the_loc, gallon, the_pawn)} :
+                        mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
 
-                                Rules_Checker rc{fuel};
-                                if(mv->inspect(rc, board) != Status::cheated){
-                                        return std::optional<mv_ptr>{mv};
-                                }
+                        if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
+                            std::end(bad_moves)){
+                                continue;
                         }
-                } else{
-                        for(auto gallon : fuel){
-                                auto mv = mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
 
-                                if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
-                                    std::end(bad_moves)){
-                                        continue;
-                                }
-
-                                Rules_Checker rc{fuel};
-                                if(mv->inspect(rc, board) != Status::cheated){
-                                        return std::optional<mv_ptr>{mv};
-                                }
+                        Rules_Checker rc{fuel};
+                        if(mv->inspect(rc, board) != Status::cheated){
+                                return std::optional<mv_ptr>{mv};
                         }
                 }
         }
-
         return std::optional<mv_ptr>{std::nullopt};
+
 }
 
 TEST_CASE("Make a thing to do a thing") {
