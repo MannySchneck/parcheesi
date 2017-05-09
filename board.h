@@ -40,6 +40,15 @@ class Board :
                                 home_rows[color] = home_row_t{};
                         }
                 }
+
+        static Board MT_Board(){
+                Board board;
+                for(auto color : Game_Consts::colors){
+                        board.nest_count[color] = 0;
+                }
+                return board;
+        }
+
         /*********************************************************************/
         /*                             Interface                             */
         /*********************************************************************/
@@ -94,6 +103,9 @@ class Board :
 
 
         static const int ring_spaces = 68;
+
+        bool operator==(const Board &rhs);
+
  private:
         // The board's 0 position is the blue color's
         // home row entry square
@@ -120,6 +132,7 @@ class Board :
         std::unordered_map<Color, int, enum_hash> final_ring;
         using home_row_t = std::unordered_map<int, std::vector<Pawn>>;
 
+        // DATA
         std::unordered_map<int, std::vector<Pawn>> positions;
         std::unordered_map<Color, home_row_t, enum_hash> home_rows;
 
@@ -129,3 +142,6 @@ class Board :
         std::string serialize_main() const;
         std::string serialize_home_row() const;
 };
+
+
+std::ostream& operator<<(std::ostream& os, const Board& c);

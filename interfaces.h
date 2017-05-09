@@ -7,6 +7,7 @@
 #include <ostream>
 #include <string>
 #include <array>
+#include <unordered_map>
 
 using fuel = std::vector<int>;
 
@@ -86,7 +87,7 @@ class IGame {
 };
 
 class Pawn :
-Serializable{
+        public Serializable{
  public:
         Pawn (int id, Color color) {
                 this->id=id;
@@ -115,6 +116,8 @@ Serializable{
 class Game_Consts {
  public:
         const static std::vector<Color> colors;
+
+        const static std::unordered_map<std::string, Color> string2color;
 };
 
 std::ostream& operator<<(std::ostream& os, const Pawn& p);

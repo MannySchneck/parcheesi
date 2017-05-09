@@ -423,6 +423,29 @@ std::string Board::serialize_home_row() const{
         return ss.str();
 }
 
+bool Board::operator==(const Board &rhs){
+                 return positions == rhs.positions
+                         && home_rows == rhs.home_rows
+                         && nest_count == rhs.nest_count;
+}
+
+std::ostream& operator<<(std::ostream& os, const Board& c)
+{
+        os << c.serialize();
+        return os;
+}
+
+
+TEST_CASE("operator== isn't completely broken"){
+        Board board1;
+        Board board2;
+
+        REQUIRE(board1 == board2);
+
+        board2.put_pawn(Pawn{0, Color::blue}, 0);
+
+        REQUIRE(!(board1 == board2));
+}
 
 TEST_CASE("Enter Pawn", "[Enter Pawn]") {
         Board board;

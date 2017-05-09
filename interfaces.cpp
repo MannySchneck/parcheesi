@@ -60,3 +60,11 @@ std::string Pawn::serialize() const{
 
 
 const std::vector<Color> Game_Consts::colors  = {Color::red, Color::yellow, Color::green, Color::blue};
+
+const std::unordered_map<std::string, Color>  Game_Consts::string2color =
+        {
+                {"red", Color::red},
+                {"yellow", Color::yellow},
+                {"green", Color::green},
+                {"blue", Color::blue}
+        };

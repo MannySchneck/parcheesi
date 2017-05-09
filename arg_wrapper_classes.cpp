@@ -2,6 +2,10 @@
 #include <sstream>
 #include "interfaces.h"
 
+Do_Move_Args::Do_Move_Args(){
+        contents.first = Board::MT_Board();
+}
+
 std::string Do_Move_Args::serialize() const{
         std::stringstream ss;
 

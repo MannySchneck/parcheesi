@@ -6,6 +6,7 @@
 class Do_Move_Args :
         public Serializable{
 public:
+        Do_Move_Args();
         std::string serialize() const override;
         std::pair<Board, fuel> contents;
 };

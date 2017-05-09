@@ -8,11 +8,11 @@ TEST_MAIN_CPP := test/catch_main.cpp
 CC_FLAGS := --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TEST
 
 CC_FLAGS +=  -stdlib=libc++ -nostdinc++ \
-          -I/usr/local/Cellar/llvm/HEAD-8d84aa2_1/include/c++/v1 \
+          -I/usr/local/Cellar/llvm/HEAD-fdcdb2a/include/c++/v1 \
 					-Ilib/boost_1_64_0 \
-					-IPEGTL/include/tao \
-		      -L/usr/local/Cellar/llvm/HEAD-8d84aa2_1/lib \
-	        -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-8d84aa2_1/lib
+					-Ilib/PEGTL/include/tao \
+		      -L/usr/local/Cellar/llvm/HEAD-fdcdb2a/lib \
+	        -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib
 
 CC := clang++
 

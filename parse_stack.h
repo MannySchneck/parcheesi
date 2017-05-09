@@ -15,6 +15,10 @@ namespace L2{
 
                 const T& peek() const;
 
+                inline bool is_empty(){
+                        return !static_cast<bool>(instr_elements.size());
+                }
+
                 void NUKE();
 
         private:

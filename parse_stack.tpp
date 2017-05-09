@@ -24,7 +24,7 @@ namespace L2{
                            << " from "
                            << typeid(T).name()
                            << " with ast dump: ";
-                        p->dump(ss);
+                        ss << p->serialize();
                         throw std::logic_error(ss.str());
                 }
         }

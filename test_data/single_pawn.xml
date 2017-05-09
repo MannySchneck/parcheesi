@@ -1,0 +1,15 @@
+<do-move>
+  <board>
+  <start> </start>
+  <main>
+    <piece-loc>
+      <pawn> <color> blue </color> <id> 0 </id> </pawn>
+      <loc> 0 </loc>
+    </piece-loc>
+  </main>
+  <home-rows> </home-rows>
+  <home> </home>
+  </board>
+  <dice>
+  </dice>
+</do-move>
