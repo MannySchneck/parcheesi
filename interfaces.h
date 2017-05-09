@@ -6,7 +6,7 @@
 #include <utility>
 #include <ostream>
 #include <string>
-
+#include <array>
 
 using fuel = std::vector<int>;
 
@@ -42,8 +42,6 @@ enum class Color {
                 yellow = 1,
                 green = 2,
                 red = 3,
-                First = blue,
-                Last = red
                 };
 
 enum posn_fields{
@@ -114,7 +112,13 @@ Serializable{
 
 };
 
+class Game_Consts {
+ public:
+        const static std::vector<Color> colors;
+};
+
 std::ostream& operator<<(std::ostream& os, const Pawn& p);
+std::ostream& operator<<(std::ostream& os, const Color& color);
 
 inline int modulo(int a, int b){
         const int result = a % b;

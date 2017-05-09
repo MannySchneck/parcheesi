@@ -3,6 +3,7 @@
 *.dSYM
 *.out
 *.profraw
+Makefile
 /.DS_Store
 /TAGS
 /lib

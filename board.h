@@ -33,10 +33,12 @@ class Board :
                         final_ring[Color::green] = final_ring[Color::yellow] + section_spacing;
                         final_ring[Color::red] = final_ring[Color::green] + section_spacing;
 
-                        nest_count[Color::blue] = 4;
-                        nest_count[Color::yellow] = 4;
-                        nest_count[Color::green] = 4;
-                        nest_count[Color::red] = 4;
+
+                        for(auto color : Game_Consts::colors){
+                                nest_count[color] = num_pawns;
+
+                                home_rows[color] = home_row_t{};
+                        }
                 }
         /*********************************************************************/
         /*                             Interface                             */
@@ -45,11 +47,10 @@ class Board :
 
 
         std::string serialize() const override;
-        std::string serialize_start() const;
 
         std::vector<Pawn> get_pawns_at_pos(int pos);
         std::vector<Pawn> get_pawns_at_pos(int pos,Color);
-        std::vector<Posn> get_pawns_of_color(Color);
+        std::vector<Posn> get_pawns_of_color(Color) const;
         int get_nest_count(Color color);
 
         using Section = std::unordered_map<int, std::vector<Pawn>>;
@@ -111,6 +112,9 @@ class Board :
         static const int starting_pos_offset = 5;
         static const int section_spacing = 17;
         static const int home_row_spaces = 7;
+
+        static const int num_pawns  = 4; // indexed from 0...
+
         std::unordered_set<int> safety_spaces;
         std::unordered_map<int, std::vector<Pawn>> positions;
         std::unordered_map<Color, int, enum_hash> starting_pos;
@@ -118,4 +122,8 @@ class Board :
         using home_row_t = std::unordered_map<int, std::vector<Pawn>>;
         std::unordered_map<Color, home_row_t, enum_hash> home_rows;
         std::unordered_map<Color, int, enum_hash> nest_count;
+
+        std::string serialize_start() const;
+        std::string serialize_main() const;
+        std::string serialize_home_row() const;
 };

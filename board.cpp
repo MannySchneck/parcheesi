@@ -132,7 +132,7 @@ std::vector<Pawn> Board::get_pawns_at_pos(int pos) {
 }
 
 
-std::vector<Posn> Board::get_pawns_of_color(Color color){
+std::vector<Posn> Board::get_pawns_of_color(Color color) const{
         std::vector<Posn> the_pawns;
 
         for(auto space : positions){
@@ -141,7 +141,7 @@ std::vector<Posn> Board::get_pawns_of_color(Color color){
                 }
         }
 
-        for(auto space : home_rows[color]){
+        for(auto space : home_rows.at(color)){
                 for(auto p : space.second){
                         if(p.color == color) the_pawns.push_back(Posn{p, space.first, true});
                 }
@@ -341,13 +341,12 @@ std::string Board::serialize() const{
         std::stringstream ss;
 
         ss << "<board> ";
-        
+
         ss << "<start> ";
         ss << serialize_start();
         ss << "</start> ";
 
-        ss << "<main> ";
-        ss << "</main> ";
+        ss << serialize_main();
 
         ss << "<home-rows> ";
         ss << "</home-rows> ";
@@ -360,20 +359,70 @@ std::string Board::serialize() const{
         return ss.str();
 }
 
+
+
 std::string Board::serialize_start() const{
-        auto nest_pawns = get_all_nest_pawns;
         std::stringstream ss;
 
-        for(Color color = Color::First; color != Color::Last; ++c) {
-                for(int i = nest_count[color]; i >= 0; --i){
-                        ss << "<color> ";
-                        ss << std::to_string(i);
-                        ss << "</color>";
-                                }
+        for(auto color : Game_Consts::colors){
+                for(int i = nest_count.at(color) - 1; i >= 0; --i){
+                        Pawn p(i, color);
+                        ss << p.serialize();
+                }
+        }
+        return ss.str();
+}
+
+std::string serialize(Posn p){
+        std::stringstream ss;
+        ss << "<piece-loc> ";
+
+        ss << std::get<pawn>(p).serialize();
+
+        ss << "<loc> ";
+        ss << std::get<loc>(p);
+        ss << " </loc> ";
+
+        ss << "</piece-loc> ";
+
+        return ss.str();
+}
+
+std::string Board::serialize_main() const{
+        std::stringstream ss;
+
+        ss << "<main> ";
+
+        for(auto color : Game_Consts::colors){
+                for(auto the_posn : get_pawns_of_color(color)){
+                        if(!std::get<is_home>(the_posn)){
+                                ss << ::serialize(the_posn);
+                        }
+                }
         }
 
-        return ss;
+        ss << "</main> ";
+
+        return ss.str();
 }
+
+std::string Board::serialize_home_row() const{
+        std::stringstream ss;
+
+        ss << "<home-rows>";
+
+        for(auto color : Game_Consts::colors){
+                for(auto the_posn : get_pawns_of_color(color)){
+                        if(std::get<is_home>(the_posn)){
+                                ss << ::serialize(the_posn);
+                        }
+                }
+        }
+        ss << "</home-rows>";
+
+        return ss.str();
+}
+
 
 TEST_CASE("Enter Pawn", "[Enter Pawn]") {
         Board board;
@@ -549,7 +598,6 @@ TEST_CASE("check_final_board", "test checking board after full turn complete"){
                 REQUIRE(std::find(pawns.begin(), pawns.end(), pos3) == pawns.end());
 
         }
-
 }
 
 
