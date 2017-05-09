@@ -158,4 +158,5 @@ TEST_CASE("Make a thing to do a thing") {
                 Dumb_Player pl1(Color::red, Direction::decreasing);
                 //TODO: WOOT
         }
+        
 }

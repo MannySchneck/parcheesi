@@ -21,6 +21,42 @@ std::ostream& operator<<(std::ostream& os, const Pawn& p)
         return os;
 }
 
-std::string Pawn::serialize() const{
-        return "ACK!";
+std::ostream& operator<<(std::ostream& os, const Color& color){
+        switch(color) {
+
+        case(Color::red) :
+                os << "red";
+                break;
+        case(Color::green) :
+                os << "green";
+                break;
+        case(Color::yellow) :
+                os << "yellow";
+                break;
+        case(Color::blue) :
+                os << "blue";
+                break;
+        default:
+                std::logic_error("Added a color and forgot to extend this operator. SAD!");
+        }
+        return os;
 }
+
+std::string Pawn::serialize() const{
+        std::stringstream ss;
+
+        ss << "<pawn> ";
+        ss << "<color> ";
+        ss << color;
+        ss << " </color> ";
+
+        ss << "<id> ";
+        ss << id;
+        ss << " </id> ";
+        ss << "</pawn> ";
+
+        return ss.str();
+}
+
+
+const std::vector<Color> Game_Consts::colors  = {Color::red, Color::yellow, Color::green, Color::blue};

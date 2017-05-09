@@ -78,7 +78,7 @@ bool MoveHome::operator!=(const  std::shared_ptr<IMove> rhs) {
 
 
 Status EnterPiece::do_move(Board &board){
-        return board.enter_pawn(pawn);
+       return board.enter_pawn(pawn);
 }
 
 bool EnterPiece::operator==(const  std::shared_ptr<IMove> rhs) {
