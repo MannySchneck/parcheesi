@@ -44,7 +44,7 @@ fuel S_Player::roll_dice(Color color, std::function<int()> die, Board board){
 
 TEST_CASE("Do a thing with dice"){
         Board board;
-        board.nest_count[Color::red] = 0;
+        board.nest[Color::red] = std::vector<Pawn>{};
 
         SECTION("blerp"){
                 S_Player p(Color::red);

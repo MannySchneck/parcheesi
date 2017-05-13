@@ -35,7 +35,7 @@ class Board :
 
 
                         for(auto color : Game_Consts::colors){
-                                nest_count[color] = num_pawns;
+                                fill_nest(color);
 
                                 home_rows[color] = home_row_t{};
                         }
@@ -44,7 +44,7 @@ class Board :
         static Board MT_Board(){
                 Board board;
                 for(auto color : Game_Consts::colors){
-                        board.nest_count[color] = 0;
+                        board.nest = std::unordered_map<Color, std::vector<Pawn>>{};
                 }
                 return board;
         }
@@ -60,7 +60,7 @@ class Board :
         std::vector<Pawn> get_pawns_at_pos(int pos);
         std::vector<Pawn> get_pawns_at_pos(int pos,Color);
         std::vector<Posn> get_pawns_of_color(Color) const;
-        int get_nest_count(Color color);
+        int get_nest_count(Color color) const;
 
         using Section = std::unordered_map<int, std::vector<Pawn>>;
 
@@ -101,10 +101,25 @@ class Board :
                 positions[pos].push_back(p);
         }
 
+        void put_pawn_hr(Pawn p, int pos){
+                home_rows[p.color][pos].push_back(p);
+        }
 
-        static const int ring_spaces = 68;
+        void put_pawn_home(Pawn p){
+                home[p.color].push_back(p);
+        }
+
+        void fill_nest(Color color){
+                for(int i = 0; i < num_pawns; ++i){
+                        nest[color].push_back(Pawn{i, color});
+                }
+        }
+
 
         bool operator==(const Board &rhs);
+
+
+        static const int ring_spaces = Game_Consts::ring_spaces;
 
  private:
         // The board's 0 position is the blue color's
@@ -135,12 +150,14 @@ class Board :
         // DATA
         std::unordered_map<int, std::vector<Pawn>> positions;
         std::unordered_map<Color, home_row_t, enum_hash> home_rows;
+        std::unordered_map<Color, std::vector<Pawn>> nest;
+        std::unordered_map<Color, std::vector<Pawn>> home;
 
-        std::unordered_map<Color, int, enum_hash> nest_count;
 
         std::string serialize_start() const;
         std::string serialize_main() const;
         std::string serialize_home_row() const;
+        std::string serialize_home() const;
 };
 
 

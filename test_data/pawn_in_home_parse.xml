@@ -1,0 +1,17 @@
+<do-move>
+  <board>
+  <start> </start>
+  <main>
+  </main>
+  <home-rows> </home-rows>
+  <home>
+    <pawn> <color> blue </color> <id> 0 </id> </pawn>
+  </home>
+  </board>
+  <dice>
+    <die>5</die>
+    <die>6</die>
+    <die>1</die>
+    <die>2</die>
+  </dice>
+</do-move>

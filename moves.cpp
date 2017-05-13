@@ -1,6 +1,7 @@
 #include "interfaces.h"
 #include "moves.h"
 #include <typeinfo>
+#include <sstream>
 
 Status Move::do_move(Board &board){
         return board.move_pawn(start, distance, pawn);
@@ -12,6 +13,48 @@ int Move::get_cost() const{
 
 int EnterPiece::get_cost() const{
         return 5; // FUCK
+}
+
+std::string EnterPiece::serialize() const{
+        std::stringstream ss;
+
+        ss << "<enter-piece> ";
+        ss << pawn.serialize();
+        ss << "</enter-piece>";
+
+        return ss.str();
+}
+
+std::string Move::serialize() const{
+        std::stringstream ss;
+
+        ss << pawn.serialize();
+        ss << "<start> " << Game_Consts::us2robby(get_start()) << " </start> ";
+        ss << "<distance> " << get_distance() << " </distance> ";
+
+        return ss.str();
+}
+
+std::string MoveMain::serialize() const{
+        std::stringstream ss;
+
+        ss << "<move-piece-main> ";
+        ss << Move::serialize();
+        ss << "</move-piece-main>";
+
+        return ss.str();
+}
+
+std::string MoveHome::serialize() const{
+        std::stringstream ss;
+
+        ss << "<move-piece-home> ";
+        ss << pawn.serialize();
+        ss << "<start> " << (get_start() - 1) << " </start> ";
+        ss << "<distance> " << get_distance() << " </distance> ";
+        ss << "</move-piece-home>";
+
+        return ss.str();
 }
 
 Status MoveMain::inspect(Rules_Checker &rc, Board board){
@@ -29,8 +72,6 @@ Status MoveMain::inspect(Rules_Checker &rc, Board board){
 
         return Status::normal;
 }
-
-
 
 bool Move::operator==(const Move& rhs) {
         return start == rhs.start && distance == rhs.distance && pawn == rhs.pawn;
@@ -140,11 +181,11 @@ Pawn Move::get_pawn(){
         return pawn;
 }
 
-int Move::get_start(){
+int Move::get_start() const{
         return start;
 }
 
-int Move::get_distance(){
+int Move::get_distance() const{
         return distance;
 }
 

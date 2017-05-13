@@ -116,11 +116,11 @@ void Board::reset_farthest_pawn(Color color){
                     std::get<pawn>(farthest_posn),
                     std::get<is_home>(farthest_posn) ? home_rows[the_pawn.color] : positions);
 
-        nest_count[the_pawn.color]++;
+        nest[the_pawn.color].push_back(the_pawn);
 }
 
-int Board::get_nest_count(Color color){
-        return nest_count.at(color);
+int Board::get_nest_count(Color color) const{
+        return nest.count(color) ? nest.at(color).size() : 0;
 }
 
 int Board::get_hr_spaces() const{
@@ -246,12 +246,19 @@ Status Board::move_pawn_hr(int start, int distance, Pawn p){
         if(hr_is_blockade(start, target_pos, p)){
                 return Status::cheated;
         }
+
+        auto& space = row[start];
+        // lol
+        space.erase((space.begin()->id == p.id) ?
+                    space.begin() :
+                    std::next(space.begin()));
+
+
         if(start + distance == home_row_spaces){
+                home[p.color].push_back(p);
                 return Status::home_bonus;
         }
 
-        auto& space = row[start];
-        space.erase((space.begin()->id == p.id) ? space.begin() : std::next(space.begin()));
 
         row[target_pos].push_back(p);
         return Status::normal;
@@ -265,6 +272,7 @@ Status Board::move_onto_hr(int start, int num_into_hr, Pawn p){
                 return Status::cheated;
         }
         if(num_into_hr == home_row_spaces){
+                home[p.color].push_back(p);
                 return Status::home_bonus;
         }
         home_rows[p.color][num_into_hr].push_back(p);
@@ -300,11 +308,16 @@ Status Board::enter_pawn(Pawn p){
         int start_pos = starting_pos[color];
         if(is_blockade(start_pos, 0))
                 return Status::cheated;
-        if(nest_count[p.color] == 0){
+        if(nest[p.color].size() == 0){
                 return Status::cheated;
         }
         positions[start_pos].push_back(p);
-        nest_count[p.color] -= 1;
+
+        auto pos = std::find(std::begin(nest[p.color]), std::end(nest[p.color]), p);
+        if (pos != std::end(nest[p.color])) {
+                nest[p.color].erase(pos);
+        }
+
         return try_bop(start_pos, p, true);
 }
 
@@ -316,7 +329,8 @@ Status Board::try_bop(int pos, Pawn p, bool entering){
         if(positions[pos].size() != 2)
                 return Status::normal;
         if(positions[pos][0].color != p.color){
-                nest_count[positions[pos].begin()->color]++;
+                auto the_pawn = positions[pos].begin();
+                nest[the_pawn->color].push_back(*the_pawn);
                 positions[pos].erase(positions[pos].begin());
                 return Status::bop_bonus;
         }
@@ -342,17 +356,13 @@ std::string Board::serialize() const{
 
         ss << "<board> ";
 
-        ss << "<start> ";
         ss << serialize_start();
-        ss << "</start> ";
 
         ss << serialize_main();
 
-        ss << "<home-rows> ";
-        ss << "</home-rows> ";
+        ss << serialize_home_row();
 
-        ss << "<home> ";
-        ss << "</home> ";
+        ss << serialize_home();
 
         ss << "</board>";
 
@@ -364,12 +374,16 @@ std::string Board::serialize() const{
 std::string Board::serialize_start() const{
         std::stringstream ss;
 
+        ss << "<start> ";
+
         for(auto color : Game_Consts::colors){
-                for(int i = nest_count.at(color) - 1; i >= 0; --i){
+                for(int i = get_nest_count(color) - 1; i >= 0; --i){
                         Pawn p(i, color);
                         ss << p.serialize();
                 }
         }
+
+        ss << "</start> ";
         return ss.str();
 }
 
@@ -409,7 +423,7 @@ std::string Board::serialize_main() const{
 std::string Board::serialize_home_row() const{
         std::stringstream ss;
 
-        ss << "<home-rows>";
+        ss << "<home-rows> ";
 
         for(auto color : Game_Consts::colors){
                 for(auto the_posn : get_pawns_of_color(color)){
@@ -418,15 +432,49 @@ std::string Board::serialize_home_row() const{
                         }
                 }
         }
-        ss << "</home-rows>";
+        ss << "</home-rows> ";
+
+        return ss.str();
+}
+
+
+std::string Board::serialize_home() const{
+        std::stringstream ss;
+
+        ss << "<home> ";
+
+        for(auto color : Game_Consts::colors){
+                if(home.count(color)){
+                        for(auto pawn : home.at(color)){
+                                ss << pawn.serialize();
+                        }
+                }
+        }
+
+        ss << "</home> ";
 
         return ss.str();
 }
 
 bool Board::operator==(const Board &rhs){
-                 return positions == rhs.positions
-                         && home_rows == rhs.home_rows
-                         && nest_count == rhs.nest_count;
+        bool found = true;
+        for(auto color : Game_Consts::colors){
+                if(nest.count(color)){
+                        for(auto pawn : nest.at(color)){
+                                auto pos = std::find(std::begin(rhs.nest.at(color)),
+                                                     std::end(rhs.nest.at(color)),
+                                                     pawn);
+                                if (pos == std::end(rhs.nest.at(color))){
+                                        found = false;
+                                }
+                        }
+                }
+                found = nest.count(color) == rhs.nest.count(color);
+        }
+
+        return positions == rhs.positions
+                && home_rows == rhs.home_rows
+                && found;
 }
 
 std::ostream& operator<<(std::ostream& os, const Board& c)
@@ -576,12 +624,13 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
                 Pawn p1(0, Color::blue);
 
-                int thing = board.nest_count[p0.color];
+                int thing = board.nest[p0.color].size();
 
-                int thingo = board.nest_count[p1.color];
+                int thingo = board.nest[p1.color].size();
+
                 REQUIRE(board.enter_pawn(p1) == Status::bop_bonus);
-                REQUIRE(board.nest_count[p1.color] == thingo - 1);
-                REQUIRE(board.nest_count[p0.color] == thing + 1);
+                REQUIRE(board.nest[p1.color].size() == thingo - 1);
+                REQUIRE(board.nest[p0.color].size() == thing + 1);
 
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)][0] == p1);
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)].size() == 1);
@@ -634,6 +683,17 @@ TEST_CASE("moving on home row"){
         REQUIRE(board.home_rows[p0.color][5].size() == 1);
         REQUIRE(board.home_rows[p0.color][5][0] == p0);
         REQUIRE(board.home_rows[p0.color][2].size() == 0);
+}
+
+TEST_CASE("moving home all the way baby"){
+        Board board;
+        Pawn p0(0, Color::blue);
+
+        board.home_rows[Color::blue][2].push_back(p0);
+
+        REQUIRE(board.move_pawn_hr(2, 5, p0) == Status::home_bonus);
+        REQUIRE(board.home_rows[p0.color][2].size() == 0);
+        REQUIRE(board.home[Color::blue][0] == p0);
 }
 
 TEST_CASE("reset_farthest pawn"){
@@ -693,6 +753,4 @@ TEST_CASE("reset_farthest pawn"){
                 REQUIRE(board.home_rows[p0.color][4].size() == 1);
                 REQUIRE(board.home_rows[p0.color][5].size() == 0);
         }
-
-
 }

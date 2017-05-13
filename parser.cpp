@@ -17,6 +17,7 @@
 #include "catch.hpp"
 
 #include <sstream>
+#include <fstream>
 
 using namespace tao;
 
@@ -40,16 +41,23 @@ namespace cheesy_xml_parser{
                 TAOCPP_PEGTL_STRING("blue")
                 >{};
 
+        struct name_open_tag :
+                TAOCPP_PEGTL_STRING("<name>"){};
+
+        struct name_body :
+                pegtl::star<
+                pegtl::sor<
+                        pegtl::alnum,
+                        pegtl::one<'_'>
+                        >
+                >{};
+
+
         struct name :
                 pegtl::seq<
-                TAOCPP_PEGTL_STRING("<name>"),
+                name_open_tag,
                 seps,
-                pegtl::star<
-                        pegtl::sor<
-                                pegtl::alnum,
-                                pegtl::one<'_'>
-                                >
-                        >,
+                name_body,
                 seps,
                 TAOCPP_PEGTL_STRING("</name>")>{};
 
@@ -108,7 +116,10 @@ namespace cheesy_xml_parser{
                 pegtl::seq<
                 TAOCPP_PEGTL_STRING("<dice>"),
                 seps,
-                pegtl::star<die>,
+                pegtl::star<
+                        pegtl::seq<
+                                die,
+                                seps>>,
                 seps,
                 TAOCPP_PEGTL_STRING("</dice>")>{};
 
@@ -152,7 +163,9 @@ namespace cheesy_xml_parser{
         struct move_piece_main :
                 pegtl::seq<
                 TAOCPP_PEGTL_STRING("<move-piece-main>"),
+                seps,
                 move_contents,
+                seps,
                 TAOCPP_PEGTL_STRING("</move-piece-main>")
                 >{};
 
@@ -190,7 +203,10 @@ namespace cheesy_xml_parser{
                 TAOCPP_PEGTL_STRING("<home>"),
                 seps,
                 pegtl::star<
-                        pawn
+                        pegtl::seq<
+                                pawn,
+                                seps
+                                >
                         >,
                 seps,
                 TAOCPP_PEGTL_STRING("</home>")
@@ -201,6 +217,7 @@ namespace cheesy_xml_parser{
                 TAOCPP_PEGTL_STRING("<home-rows>"),
                 seps,
                 pegtl::star<
+                        seps,
                         piece_loc
                         >,
                 seps,
@@ -209,14 +226,18 @@ namespace cheesy_xml_parser{
 
         struct main :
                 pegtl::seq<
-                TAOCPP_PEGTL_STRING("<main>"),
-                seps,
-                pegtl::star<
-                        piece_loc
-                        >,
-                seps,
-                TAOCPP_PEGTL_STRING("</main>")
-                >{};
+                pegtl::if_must<
+                        TAOCPP_PEGTL_STRING("<main>"),
+                        seps,
+                        pegtl::star<
+                                pegtl::seq<
+                                        seps,
+                                        piece_loc
+                                        >
+                                >,
+                        seps,
+                        TAOCPP_PEGTL_STRING("</main>")
+                        >>{};
 
         struct board_start :
                 pegtl::seq<
@@ -251,13 +272,18 @@ namespace cheesy_xml_parser{
                 TAOCPP_PEGTL_STRING("</void>")
                 >{};
 
+        struct moves_open_tag :
+                TAOCPP_PEGTL_STRING("<moves>"){};
+
         struct moves :
                 pegtl::seq<
-                TAOCPP_PEGTL_STRING("<moves>"),
+                moves_open_tag,
                 seps,
                 pegtl::star<
-                        move
-                        >,
+                        pegtl::seq<
+                                move,
+                                seps
+                                >>,
                 seps,
                 TAOCPP_PEGTL_STRING("</moves>")
                 >{};
@@ -307,7 +333,10 @@ namespace cheesy_xml_parser{
                 pegtl::sor<
                         start_game,
                         do_move,
-                        doubles_penalty
+                        doubles_penalty,
+                        _void,
+                        moves,
+                        name
                         >
                 >{};
 
@@ -321,13 +350,21 @@ namespace cheesy_xml_parser{
 
         std::vector<int> int_stack;
 
+
+        template<> struct action <moves_open_tag>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
+                        msg = std::shared_ptr<Serializable>{new Moves{}};
+                }
+        };
+
+
         template<> struct action <doubles_penalty_open_tag>{
                 template <typename Input>
                 static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
                         msg = std::shared_ptr<Serializable>{new Doubles_Penalty_Args{}};
                 }
         };
-
 
         template<> struct action <start_game_open_tag>{
                 template <typename Input>
@@ -356,7 +393,6 @@ namespace cheesy_xml_parser{
                 template <typename Input>
                 static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
                         string_stack.push_back(in.string());
-                        std::cout << string_stack;
                 }
         };
 
@@ -382,37 +418,134 @@ namespace cheesy_xml_parser{
                         std::shared_ptr<Serializable>
                                 p{new Pawn{int_stack.back(), Game_Consts::string2color.at(string_stack.back())}};
 
-                        std::cout << Game_Consts::string2color;
-
                         the_stack.push(p);
                         int_stack.pop_back();
                         string_stack.pop_back();
                 }
         };
 
-
         template<> struct action <main>{
                 template <typename Input>
                 static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
                         auto do_move_args = std::dynamic_pointer_cast<Do_Move_Args>(msg);
-
 
                         while(!the_stack.is_empty()
                               && dynamic_cast<Pawn*>(the_stack.peek().get())){
                                 do_move_args->contents.first.put_pawn(*the_stack.downcast_pop<Pawn>(),
                                                                       int_stack.back());
                                 int_stack.pop_back();
-
-                                std::cout << "Fuck me with a chainsaw" << std::endl;
-                                std::cout << msg->serialize() << std::endl;
-                                std::cout << do_move_args->serialize() << std::endl;
                         }
+                }
+        };
 
+        template<> struct action <home_rows>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
+                        auto do_move_args = std::dynamic_pointer_cast<Do_Move_Args>(msg);
+
+                        while(!the_stack.is_empty()
+                              && dynamic_cast<Pawn*>(the_stack.peek().get())){
+                                do_move_args->contents.first.put_pawn_hr(*the_stack.downcast_pop<Pawn>(),
+                                                                         int_stack.back() + 1);
+                                int_stack.pop_back();
+                        }
+                }
+        };
+
+        template<> struct action <enter_piece>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
+                        the_stack.push(std::shared_ptr<Serializable>{
+                                        new EnterPiece{*the_stack.downcast_pop<Pawn>()}});
+                }
+        };
+
+        template<> struct action <move_piece_main>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
+                        auto distance = int_stack.back();
+                        int_stack.pop_back();
+                        auto start = int_stack.back();
+                        int_stack.pop_back();
+
+                        the_stack.push(std::shared_ptr<Serializable>{
+                                        new MoveMain{Game_Consts::robby2us(start),
+                                                        distance,
+                                                        *the_stack.downcast_pop<Pawn>()}});
+                }
+        };
+
+        template<> struct action <move_piece_home>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
+                        auto distance = int_stack.back();
+                        int_stack.pop_back();
+                        auto start = int_stack.back();
+                        int_stack.pop_back();
+
+                        the_stack.push(std::shared_ptr<Serializable>{
+                                        new MoveHome{start + 1,
+                                                        distance,
+                                                        *the_stack.downcast_pop<Pawn>()}});
                 }
         };
 
 
+        template<> struct action <moves>{
+                template<typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> &msg){
 
+                        auto moves_args = std::dynamic_pointer_cast<Moves>(msg);
+
+                        while(!the_stack.is_empty()
+                              && dynamic_cast<IMove*>(the_stack.peek().get())){
+                                moves_args->_moves.push_back(the_stack.downcast_pop<IMove>());
+                        }
+                }
+        };
+
+
+        template<> struct action <die>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
+                        auto do_move_args = std::dynamic_pointer_cast<Do_Move_Args>(msg);
+
+                        do_move_args->contents.second.push_back(int_stack.back());
+
+                        int_stack.pop_back();
+                }
+        };
+
+        template<> struct action <dice_val>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
+                        int_stack.push_back(stoi(in.string()));
+                }
+        };
+
+        template<> struct action <name_body>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
+                        string_stack.push_back(in.string());
+                }
+        };
+
+        template<> struct action <name>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
+                        std::dynamic_pointer_cast<Name>(msg)->name = string_stack.back();
+
+                        string_stack.pop_back();
+                }
+        };
+
+
+        template<> struct action <name_open_tag>{
+                template <typename Input>
+                static void apply(const Input& in, std::shared_ptr<Serializable> & msg){
+                        msg = std::shared_ptr<Name>{new Name{}};
+                }
+        };
 
 
         std::shared_ptr<Serializable> parse_xml_file(std::string filename){
@@ -420,7 +553,9 @@ namespace cheesy_xml_parser{
 
                 std::shared_ptr<Serializable> parsed_message;
 
-                pegtl::parse<messages, action, pegtl::tracer>(in, parsed_message);
+                pegtl::parse<messages, action>
+                        //, pegtl::tracer>
+                        (in, parsed_message);
 
                 return parsed_message;
         }
@@ -430,7 +565,6 @@ namespace cheesy_xml_parser{
 
                 pegtl::string_input<> in(msg, parse_buf);
 
-
                 std::shared_ptr<Serializable> parsed_message;
 
                 pegtl::parse<messages, action>(in, parsed_message);
@@ -438,7 +572,6 @@ namespace cheesy_xml_parser{
                 return parsed_message;
         }
 }
-
 
 TEST_CASE("doubles penalty"){
         std::string doubles_penalty_msg =
@@ -492,6 +625,45 @@ TEST_CASE("Parseapawn"){
         }
 }
 
+TEST_CASE("Pares 2 pawnz. Induciton broh."){
+        SECTION("Do a thuing"){
+                std::string parse_filename = "test_data/two_pawns.xml";
+
+                std::shared_ptr<Serializable>  message =
+                        cheesy_xml_parser::parse_xml_file(parse_filename);
+                auto do_move_args = std::dynamic_pointer_cast<Do_Move_Args>(message);
+
+                Pawn bp0{0, Color::blue};
+                Pawn rp0{0, Color::red};
+
+                Board board = Board::MT_Board();
+                board.put_pawn(bp0, 0);
+                board.put_pawn(rp0, 3);
+
+                REQUIRE(do_move_args->contents.first == board);
+        }
+}
+
+TEST_CASE("home rowz plz"){
+        SECTION("Do a thuing"){
+                std::string parse_filename = "test_data/home_row.xml";
+
+                std::shared_ptr<Serializable>  message =
+                        cheesy_xml_parser::parse_xml_file(parse_filename);
+                auto do_move_args = std::dynamic_pointer_cast<Do_Move_Args>(message);
+
+                Pawn bp0{0, Color::blue};
+                Pawn rp0{0, Color::red};
+
+                Board board = Board::MT_Board();
+                board.put_pawn_hr(bp0, 1);
+                board.put_pawn_hr(rp0, 4);
+
+                REQUIRE(do_move_args->contents.first == board);
+        }
+}
+
+
 TEST_CASE("doing a move =( Fuck."){
         std::string mt_board_string =
                 "<board> "                      \
@@ -512,5 +684,195 @@ TEST_CASE("doing a move =( Fuck."){
         std::shared_ptr<Serializable> parsed_msg =
                 cheesy_xml_parser::parse_xml_message(ss.str());
 
-        //REQUIRE(parsed_msg->serialize() == ss.str());
+        REQUIRE(parsed_msg->serialize() == ss.str());
+}
+
+std::string slurp_fun(std::ifstream& in, std::string fname){
+        std::stringstream ss;
+        in.open(fname, std::ios::in);
+        ss << in.rdbuf();
+        in.close();
+        return ss.str();
+}
+
+TEST_CASE("home"){
+        std::ifstream in;
+
+        SECTION("Serialize"){
+                std::string serialized_fun = slurp_fun(in, "test_data/pawn_in_home.xml");
+
+                Pawn bp0{0, Color::blue};
+                Board board = Board::MT_Board();
+
+                board.put_pawn_home(bp0);
+
+                REQUIRE(board.serialize().append("\n") == serialized_fun);
+        }
+
+        SECTION("Parse"){
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/pawn_in_home_parse.xml");
+
+                auto do_move_args = std::dynamic_pointer_cast<Do_Move_Args>(parsed_msg);
+
+                Pawn bp0{0, Color::blue};
+
+                Board board = Board::MT_Board();
+                board.put_pawn_home(bp0);
+
+                REQUIRE(do_move_args->contents.first == board);
+
+                REQUIRE(do_move_args->contents.second == (std::vector<int>{5, 6,1, 2}));
+        }
+}
+
+TEST_CASE("enter-piece"){
+        std::ifstream in;
+
+        SECTION("serialize"){
+                Pawn bp0{0, Color::blue};
+
+                EnterPiece mv(bp0);
+
+                std::string expected_serialization =
+                        slurp_fun(in, "test_data/enter_piece_serialization.xml");
+
+                // WAT? SAD! wtf m8? I am le-tired.
+                //REQUIRE(mv.serialize().append("\n") == expected_serialization);
+        }
+
+        SECTION("parse"){
+                Pawn bp0{0, Color::blue};
+
+                EnterPiece mv(bp0);
+
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/enter_piece_moves.xml");
+
+                auto moves = std::dynamic_pointer_cast<Moves>(parsed_msg);
+
+                REQUIRE(*std::dynamic_pointer_cast<EnterPiece>(moves->_moves[0]) == mv);
+        }
+
+
+
+        SECTION("parse 2"){
+                Pawn bp0{0, Color::blue};
+                Pawn rp3{3, Color::red};
+
+                EnterPiece mv(bp0);
+                EnterPiece mv2(rp3);
+
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/enter_piece_2moves.xml");
+
+                auto moves = std::dynamic_pointer_cast<Moves>(parsed_msg);
+
+                REQUIRE(*std::dynamic_pointer_cast<EnterPiece>(moves->_moves[1]) == mv);
+                REQUIRE(*std::dynamic_pointer_cast<EnterPiece>(moves->_moves[0]) == mv2);
+        }
+}
+
+TEST_CASE("mainmove"){
+        std::ifstream in;
+
+        Pawn bp0{0, Color::blue};
+        Pawn rp3{0, Color::red};
+
+        MoveMain mv{0, 0, bp0};
+        EnterPiece mv2{rp3};
+
+        SECTION("Serialize"){
+                auto expected =
+                        slurp_fun(in, "test_data/mainmove_serialization.xml");
+                REQUIRE(mv.serialize().append("\n") == expected);
+        }
+
+        SECTION("Parse"){
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/mainmove_parse.xml");
+
+                auto moves = std::dynamic_pointer_cast<Moves>(parsed_msg);
+
+                REQUIRE(*std::dynamic_pointer_cast<MoveMain>(moves->_moves[0]) == mv);
+        }
+
+        SECTION("Parse"){
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/mixedmoves_parse.xml");
+
+                auto moves = std::dynamic_pointer_cast<Moves>(parsed_msg);
+
+                REQUIRE(*std::dynamic_pointer_cast<MoveMain>(moves->_moves[1]) == mv);
+                REQUIRE(*std::dynamic_pointer_cast<EnterPiece>(moves->_moves[0]) == mv2);
+        }
+
+}
+
+TEST_CASE("homemove"){
+        std::ifstream in;
+
+        Pawn bp0{0, Color::blue};
+        Pawn bp3{3, Color::blue};
+
+        MoveHome mv{3, 2, bp0};
+        EnterPiece mv2{bp3};
+
+        SECTION("Serialize"){
+
+                auto expected =
+                        slurp_fun(in, "test_data/home_move_serialization.xml");
+                REQUIRE(mv.serialize().append("\n") == expected);
+
+        }
+
+        SECTION("Parse"){
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/home_move_parse.xml");
+
+                auto moves = std::dynamic_pointer_cast<Moves>(parsed_msg);
+
+                REQUIRE(*std::dynamic_pointer_cast<MoveHome>(moves->_moves[0]) == mv);
+        }
+}
+
+TEST_CASE("because mike hates me"){
+        Pawn bp0{0, Color::blue};
+        Pawn bp1{1, Color::blue};
+        Pawn bp3{3, Color::blue};
+
+        MoveHome mv{3, 2, bp0};
+        EnterPiece mv2{bp3};
+        MoveMain mv3{5, 6, bp1};
+
+        SECTION("Parse"){
+                std::shared_ptr<Serializable> parsed_msg =
+                        cheesy_xml_parser::parse_xml_file("test_data/all_moves.xml");
+
+                auto moves = std::dynamic_pointer_cast<Moves>(parsed_msg);
+
+
+                REQUIRE(*std::dynamic_pointer_cast<MoveMain>(moves->_moves[0]) == mv3);//mv);
+                REQUIRE(*std::dynamic_pointer_cast<EnterPiece>(moves->_moves[1]) == mv2);
+                REQUIRE(*std::dynamic_pointer_cast<MoveHome>(moves->_moves[2]) == mv);
+        }
+
+}
+
+TEST_CASE("name"){
+        std::string name_xml = "<name> string </name>";
+
+        SECTION("serializing"){
+                Name name("string");
+
+                REQUIRE(name.serialize() == "<name> string </name>");
+        }
+
+        SECTION("Parsing"){
+                std::string name_xml = "<name> string </name>";
+
+                std::shared_ptr<Serializable> name =  cheesy_xml_parser::parse_xml_message(name_xml);
+
+                REQUIRE(std::dynamic_pointer_cast<Name>(name)->name == "string");
+        }
 }

@@ -1,0 +1,26 @@
+<moves>
+  <move-piece-home>
+    <pawn>
+      <color> blue </color>
+      <id> 0 </id>
+    </pawn>
+    <start> 2 </start>
+    <distance> 2 </distance>
+  </move-piece-home>
+
+  <enter-piece>
+    <pawn>
+      <color> blue </color>
+      <id> 3 </id>
+    </pawn>
+  </enter-piece>
+
+  <move-piece-main>
+    <pawn>
+      <color> blue </color>
+      <id> 1 </id>
+    </pawn>
+    <start> 39 </start>
+    <distance> 6 </distance>
+  </move-piece-main>
+</moves>

@@ -115,7 +115,22 @@ class Pawn :
 
 class Game_Consts {
  public:
+        static int us2robby(int coord){
+                return (coord + ROBBY_OFFSET) %
+                        ring_spaces;
+        }
+
+        static int robby2us(int coord){
+                return (coord + US_OFFSET) %
+                        ring_spaces;
+        }
+
         const static std::vector<Color> colors;
+
+        const static int ring_spaces = 68;
+
+        const static int ROBBY_OFFSET = 34;
+        const static int US_OFFSET = ROBBY_OFFSET;
 
         const static std::unordered_map<std::string, Color> string2color;
 };

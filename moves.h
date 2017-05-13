@@ -6,7 +6,8 @@
 
 class Rules_Checker;
 
-class IMove {
+class IMove :
+        public Serializable{
  public:
         virtual Status inspect(Rules_Checker &rc, Board board) = 0;
         virtual Status do_move(Board &board) = 0;
@@ -39,6 +40,8 @@ class EnterPiece : public IMove{
         virtual bool operator!=(const  std::shared_ptr<IMove> rhs)override;
 
         bool operator==(const EnterPiece& rhs);
+
+        std::string serialize() const override;
  private:
         Pawn pawn;
         //Status update_board(Board &b) override;
@@ -49,15 +52,18 @@ class Move : public IMove{
         Move(int start, int distance, Pawn pawn);
         Status do_move(Board &board) override;
         Pawn get_pawn();
-        int get_start();
-        int get_distance();
+        int get_start() const;
+        int get_distance() const;
 
         int get_cost() const override;
 
         bool operator==(const Move& rhs) ;
 
         friend std::ostream& operator<<(std::ostream &out, const Move &mv);
- private:
+
+
+        std::string serialize() const override;
+protected:
         Pawn pawn;
         int start;
         int distance;
@@ -76,6 +82,9 @@ class MoveMain : public Move{
         virtual bool operator==(const  std::shared_ptr<IMove> rhs) override;
         virtual bool operator!=(const  std::shared_ptr<IMove> rhs) override;
         bool operator==(const MoveMain& rhs);
+
+
+        std::string serialize() const override;
 };
 
 // represents a move that starts on one of the home rows
@@ -88,6 +97,7 @@ class MoveHome : public Move{
         virtual bool operator==(const  std::shared_ptr<IMove> rhs) override;
         virtual bool operator!=(const  std::shared_ptr<IMove> rhs) override;
 
-
         bool operator==(const MoveHome& rhs) ;
+
+        std::string serialize() const override;
 };

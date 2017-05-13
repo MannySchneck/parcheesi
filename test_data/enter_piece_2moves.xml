@@ -1,0 +1,14 @@
+<moves>
+  <enter-piece>
+    <pawn>
+      <color> blue </color>
+      <id> 0 </id>
+    </pawn>
+  </enter-piece>
+  <enter-piece>
+    <pawn>
+      <color> red </color>
+      <id> 3 </id>
+    </pawn>
+  </enter-piece>
+</moves>
