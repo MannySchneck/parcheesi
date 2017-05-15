@@ -7,14 +7,16 @@ TEST_MAIN_CPP := test/catch_main.cpp
 
 SRCS := TEST_MAIN_CPP CPP_TEST_FILES CPP_PROG_FILES
 
-CCX_FLAGS := --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TEST
+CCX_FLAGS := --std=c++1z -O0 -g -fprofile-instr-generate -fcoverage-mapping -D TEST \
+							-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
 
 CCX_FLAGS +=  -stdlib=libc++ -nostdinc++ \
           -I/usr/local/Cellar/llvm/HEAD-fdcdb2a/include/c++/v1 \
 					-Ilib/boost_1_64_0 \
 					-Ilib/PEGTL/include/tao \
 		      -L/usr/local/Cellar/llvm/HEAD-fdcdb2a/lib \
-	        -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib
+	        -Wl,-rpath, /usr/local/Cellar/llvm/HEAD-fdcdb2a/lib \
+					-l boost_system
 
 CCX := clang++
 
