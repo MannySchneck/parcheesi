@@ -11,8 +11,6 @@
 
 #include <sstream>
 
-using Posn = std::tuple<Pawn, int, bool>;
-
 Status Board::apply(std::shared_ptr<IMove> mv){
 
         Status status;
@@ -50,12 +48,16 @@ std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
         auto posns = get_pawns_of_color(color);
         std::sort(std::begin(posns), std::end(posns),
                   [this, dir, color](const Posn &fuck, const Posn &you){
+                          if(std::get<loc>(you) == -1)
+                                  return false;
+
                           bool same_ring = std::get<is_home>(fuck) == std::get<is_home>(you);
                           bool index_greater = std::get<is_home>(you) ? std::get<loc>(you) > std::get<loc>(fuck) :
                                   pos_to_dist(std::get<loc>(you), color) > pos_to_dist(std::get<loc>(fuck), color);
                           bool home_beats_ring = std::get<is_home>(you) && !std::get<is_home>(fuck);
 
                           bool result;
+
 
                           if(same_ring){
                                   result = index_greater;
@@ -66,9 +68,9 @@ std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
 
                           switch(dir){
                           case(Direction::increasing):
-                                  return !result;
-                          case(Direction::decreasing):
                                   return result;
+                          case(Direction::decreasing):
+                                  return !result;
                           default:
                                   throw std::logic_error("Fuck you. Shoulda used coq");
                           }
@@ -78,25 +80,9 @@ std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
 
 std::optional<Posn> Board::get_farthest_pawn(Color color){
         auto posns = get_pawns_of_color(color);
-        if(posns.size() == 0){
-                return std::optional<Posn>(std::nullopt);
-        }
 
-        Posn farthest_posn = posns[0];
+        return get_sorted_pawns(color, Direction::increasing).back();
 
-        for(auto posn : posns){
-                bool same_ring = std::get<is_home>(farthest_posn) == std::get<is_home>(posn);
-                bool index_greater = std::get<is_home>(posn) ? std::get<loc>(posn) > std::get<loc>(farthest_posn) :
-                        pos_to_dist(std::get<loc>(posn), color) > pos_to_dist(std::get<loc>(farthest_posn), color);
-                bool home_beats_ring = std::get<is_home>(posn) && !std::get<is_home>(farthest_posn);
-
-
-                if((same_ring && index_greater) || home_beats_ring){
-                        farthest_posn = posn;
-                }
-        }
-
-        return farthest_posn;
 }
 
 void Board::reset_farthest_pawn(Color color){
@@ -134,6 +120,12 @@ std::vector<Pawn> Board::get_pawns_at_pos(int pos) {
 
 std::vector<Posn> Board::get_pawns_of_color(Color color) const{
         std::vector<Posn> the_pawns;
+
+        if(nest.count(color)){
+                for(auto pawn : nest.at(color)){
+                        the_pawns.push_back(Posn{pawn, -1, false});
+                }
+        }
 
         for(auto space : positions){
                 for(auto p : space.second){
@@ -377,9 +369,10 @@ std::string Board::serialize_start() const{
         ss << "<start> ";
 
         for(auto color : Game_Consts::colors){
-                for(int i = get_nest_count(color) - 1; i >= 0; --i){
-                        Pawn p(i, color);
-                        ss << p.serialize();
+                if(nest.count(color)){
+                        for(auto pawn : nest.at(color)){
+                                ss << pawn.serialize();
+                        }
                 }
         }
 

@@ -52,7 +52,6 @@ class Board :
         /*********************************************************************/
         /*                             Interface                             */
         /*********************************************************************/
-        using Posn = std::tuple<Pawn, int, bool>;
 
 
         std::string serialize() const override;

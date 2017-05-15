@@ -15,7 +15,7 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
         auto posns = board.get_sorted_pawns(color, direction);
 
         // *WRONG*
-        if(direction == Direction::increasing){
+        if(direction == Direction::decreasing){
                 if(std::find(fuel.begin(), fuel.end(), 5) != fuel.end()
                    && board.get_nest_count(color)){
                         return mv_ptr{new EnterPiece(Pawn(board.get_nest_count(color) - 1, color))};
@@ -53,7 +53,7 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
 }
 
 TEST_CASE("Make a thing to do a thing") {
-        Dumb_Player pl0(Color::red, Direction::increasing);
+        Dumb_Player pl0(Color::red, Direction::decreasing);
         Pawn p0(0, Color::red);
         Pawn p1(1, Color::red);
         Pawn bp0(0, Color::blue);
@@ -123,7 +123,7 @@ TEST_CASE("Make a thing to do a thing") {
         }
 
         SECTION("flippy floppy"){
-                Dumb_Player pl1(Color::red, Direction::decreasing);
+                Dumb_Player pl1(Color::red, Direction::increasing);
 
                 board.put_pawn(p0, red_start + 1);
                 board.put_pawn(p1, red_start - 1);
@@ -137,7 +137,7 @@ TEST_CASE("Make a thing to do a thing") {
         }
 
         SECTION("making sure that bad move set prevents moves being called"){
-                Dumb_Player pl1(Color::red, Direction::decreasing);
+                Dumb_Player pl1(Color::red, Direction::increasing);
 
                 board.put_pawn(p0, red_start + 1);
                 board.put_pawn(p1, red_start - 1);
@@ -155,7 +155,7 @@ TEST_CASE("Make a thing to do a thing") {
         }
 
         SECTION("can't move a blockade"){
-                Dumb_Player pl1(Color::red, Direction::decreasing);
+                Dumb_Player pl1(Color::red, Direction::increasing);
                 //TODO: WOOT
         }
         

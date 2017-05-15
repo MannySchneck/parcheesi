@@ -47,7 +47,7 @@ void Net_Connection::shovel_bits(std::string msg){
 // {}
 
 
-TEST_CASE("send a messsage"){
+TEST_CASE("send a messsage", "[.]"){
 
         //std::cout << "press enter once you've started the netcat server" << std::endl;
 
