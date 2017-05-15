@@ -10,6 +10,23 @@ Dumb_Player::Dumb_Player(Color color, Direction direction) :
         color(color),
         direction(direction) {}
 
+
+fuel find_entry_rolls(fuel fuel){
+        for(auto gallon : fuel){
+                if(gallon == Game_Consts::entry_roll) return {Game_Consts::entry_roll};
+        }
+
+        for(auto gallon = fuel.begin(); gallon != std::prev(fuel.end()); gallon++){
+                for(auto gallon2 = std::next(gallon); gallon2 != fuel.end(); gallon2++){
+                        if(*gallon + *gallon2 == Game_Consts::entry_roll){
+                                return {*gallon, *gallon2};
+                        }
+                }
+        }
+
+        return {};
+}
+
 std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::vector<mv_ptr> bad_moves){
 
         auto posns = board.get_sorted_pawns(color, direction);
@@ -30,8 +47,6 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                 auto the_is_home = std::get<is_home>(posn);
                 auto the_loc = std::get<loc>(posn);
                 auto the_pawn = std::get<pawn>(posn);
-
-
 
                 for (auto gallon : fuel){
                         auto mv = the_is_home ? mv_ptr{new MoveHome(the_loc, gallon, the_pawn)} :
@@ -158,5 +173,5 @@ TEST_CASE("Make a thing to do a thing") {
                 Dumb_Player pl1(Color::red, Direction::increasing);
                 //TODO: WOOT
         }
-        
+
 }

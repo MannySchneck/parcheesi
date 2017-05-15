@@ -129,6 +129,8 @@ class Game_Consts {
 
         const static int ring_spaces = 68;
 
+        const static int entry_roll = 5;
+
         const static int ROBBY_OFFSET = 34;
         const static int US_OFFSET = ROBBY_OFFSET;
 
