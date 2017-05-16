@@ -16,14 +16,10 @@ fuel find_entry_rolls(fuel fuel){
                 if(gallon == Game_Consts::entry_roll) return {Game_Consts::entry_roll};
         }
 
-        for(auto gallon = fuel.begin(); gallon != std::prev(fuel.end()); gallon++){
-                for(auto gallon2 = std::next(gallon); gallon2 != fuel.end(); gallon2++){
-                        if(*gallon + *gallon2 == Game_Consts::entry_roll){
-                                return {*gallon, *gallon2};
-                        }
-                }
+        for(auto gallon : fuel){
+                if(auto gallon2 = std::find(fuel.begin(), fuel.end(), Game_Consts::entry_roll - gallon) != fuel.end())
+                        return {gallon, gallon2};
         }
-
         return {};
 }
 
@@ -31,12 +27,9 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
 
         auto posns = board.get_sorted_pawns(color, direction);
 
-        // *WRONG*
         if(direction == Direction::decreasing){
-                if(std::find(fuel.begin(), fuel.end(), 5) != fuel.end()
-                   && board.get_nest_count(color)){
+                if(find_entry_rolls(fuel).size())
                         return mv_ptr{new EnterPiece(Pawn(board.get_nest_count(color) - 1, color))};
-                }
         }
 
         if(posns.size() == 0){
