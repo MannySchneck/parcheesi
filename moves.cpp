@@ -7,12 +7,12 @@ Status Move::do_move(Board &board){
         return board.move_pawn(start, distance, pawn);
 }
 
-int Move::get_cost() const{
-        return distance;
+std::vector<int> Move::get_cost() const{
+        return {distance};
 }
 
-int EnterPiece::get_cost() const{
-        return 5; // FUCK
+std::vector<int> EnterPiece::get_cost() const{
+        return cost;
 }
 
 std::string EnterPiece::serialize() const{
@@ -168,9 +168,14 @@ Status MoveHome::inspect(Rules_Checker &rc, Board board){
 
 IMove::IMove() = default;
 
-EnterPiece::EnterPiece(Pawn pawn) :
-        pawn(pawn)
+EnterPiece::EnterPiece(Pawn pawn):
+        pawn(pawn),
+        cost({5 })
 {}
+
+EnterPiece::EnterPiece(Pawn pawn, std::vector<int> cost) :
+        pawn(pawn),
+        cost(cost){}
 
 Move::Move(int start, int distance, Pawn pawn)
         : pawn(pawn),

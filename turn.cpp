@@ -157,7 +157,29 @@ TEST_CASE("Turn tests"){
                 REQUIRE(turn.fuel == fuel{});
         }
 
+
         SECTION("Entering with {3,2} correctly consumes fuel"){
-                
+                //TODO: WRITE this
+        }
+
+        SECTION("updating the board updates the board"){
+                Board board;
+                Pawn bp0(0, Color::blue);
+
+                int blue_start = board.get_color_start_space(Color::blue);
+
+                board.put_pawn(bp0, blue_start);
+
+                Turn t{board, Color::blue, {1}};
+
+                mv_ptr mv{new MoveMain(blue_start, 1, bp0)};
+
+                Board new_board;
+
+                new_board.put_pawn(bp0, blue_start + 1);
+
+                REQUIRE(t.update_cur_board(mv) == Status::normal);
+
+                REQUIRE(new_board == t.get_new_board());
         }
 }

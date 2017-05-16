@@ -3,7 +3,7 @@
 #include <vector>
 
 #include <pegtl.hpp>
-#include <pegtl/contrib/tracer.hpp>
+#include <pegtl/tracer.hpp>
 #include <pegtl/analyze.hpp>
 #include "parse_stack.h"
 

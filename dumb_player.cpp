@@ -17,23 +17,22 @@ fuel find_entry_rolls(fuel fuel){
         }
 
         for(auto gallon : fuel){
-                if(auto gallon2 = std::find(fuel.begin(), fuel.end(), Game_Consts::entry_roll - gallon) != fuel.end())
+                if(auto gallon2 = std::find(fuel.begin(),
+                                            fuel.end(),
+                                            Game_Consts::entry_roll - gallon) != fuel.end())
                         return {gallon, gallon2};
         }
         return {};
 }
 
+//FIXME :: Doesn't try to enter piece..
 std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::vector<mv_ptr> bad_moves){
 
+        std::optional<mv_ptr> mv{std::nullopt};
+
         auto posns = board.get_sorted_pawns(color, direction);
-
-        if(direction == Direction::decreasing){
-                if(find_entry_rolls(fuel).size())
-                        return mv_ptr{new EnterPiece(Pawn(board.get_nest_count(color) - 1, color))};
-        }
-
         if(posns.size() == 0){
-                return std::optional<mv_ptr>{std::nullopt};
+                return mv;
         }
 
         for(auto posn : posns){
@@ -42,22 +41,31 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                 auto the_pawn = std::get<pawn>(posn);
 
                 for (auto gallon : fuel){
-                        auto mv = the_is_home ? mv_ptr{new MoveHome(the_loc, gallon, the_pawn)} :
-                        mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
-
+                        if(the_is_home){
+                                mv = mv_ptr{new MoveHome(the_loc, gallon, the_pawn)};
+                        }
+                        else if(the_loc == -1){
+                                auto rolls = find_entry_rolls(fuel);
+                                if(rolls.size())
+                                        mv = mv_ptr{new EnterPiece{the_pawn, rolls}};
+                                else mv = std::nullopt;
+                        }
+                        else{
+                                mv = mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
+                        }
                         if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
                             std::end(bad_moves)){
                                 continue;
                         }
 
                         Rules_Checker rc{fuel};
-                        if(mv->inspect(rc, board) != Status::cheated){
+                        if(mv.has_value() && mv.value()->inspect(rc, board) != Status::cheated){
                                 return std::optional<mv_ptr>{mv};
                         }
                 }
         }
-        return std::optional<mv_ptr>{std::nullopt};
 
+        return std::nullopt;
 }
 
 TEST_CASE("Make a thing to do a thing") {
@@ -162,9 +170,52 @@ TEST_CASE("Make a thing to do a thing") {
                         mv);
         }
 
-        SECTION("can't move a blockade"){
-                Dumb_Player pl1(Color::red, Direction::increasing);
-                //TODO: WOOT
+        SECTION("entering a piece when direction increasing"){
+                        Dumb_Player pl1(Color::red, Direction::increasing);
+
+                        fuel fuel1{5};
+
+                        mv_ptr mv{new EnterPiece{p0}};
+                        REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel1, {mv}).value())) == mv);
+
+                        fuel fuel2{3, 2};
+
+                        REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel2, {mv}).value())) == mv);
         }
 
+        SECTION("entering a piece when direction decreasing"){
+                Dumb_Player pl1(Color::red, Direction::decreasing);
+
+                fuel fuel1{5};
+
+                mv_ptr mv{new EnterPiece{p0}};
+                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel1, {mv}).value())) == mv);
+
+                fuel fuel2{3, 2};
+
+                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel2, {mv}).value())) == mv);
+        }
+
+        SECTION("can't move a blockade"){
+                Dumb_Player pl1(Color::red, Direction::decreasing);
+
+                board.put_pawn(p0, board.get_color_start_space(Color::red) + 2);
+                board.put_pawn(p1, board.get_color_start_space(Color::red) + 2);
+
+                board.put_pawn(bp0, board.get_color_start_space(Color::red));
+                board.put_pawn(bp1, board.get_color_start_space(Color::red));
+
+                fuel fuel{2,2};
+
+                auto moves = pl1.doMove(board, fuel);
+
+                Board new_board;
+                new_board.put_pawn(p1, board.get_color_start_space(Color::red) + 6);
+                new_board.put_pawn(p0, board.get_color_start_space(Color::red) + 2);
+
+                new_board.put_pawn(bp0, board.get_color_start_space(Color::red));
+                new_board.put_pawn(bp1, board.get_color_start_space(Color::red));
+
+                REQUIRE(new_board == pl1.turn.value().get_new_board());
+        }
 }

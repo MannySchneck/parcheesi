@@ -19,6 +19,7 @@ std::vector<mv_ptr> M_Player::doMove(Board board, fuel fuel){
                 if(Status::cheated  == turn->update_cur_board(mv.value())){
                         bad_moves.push_back(mv.value());
                 } else{
+                        bad_moves = {};
                         moves.push_back(mv.value());
                 }
         }
@@ -28,3 +29,4 @@ std::vector<mv_ptr> M_Player::doMove(Board board, fuel fuel){
 void M_Player::DoublesPenalty(){
         return;
 }
+

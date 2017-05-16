@@ -12,7 +12,7 @@ class IMove :
         virtual Status inspect(Rules_Checker &rc, Board board) = 0;
         virtual Status do_move(Board &board) = 0;
 
-        virtual int get_cost() const = 0;
+        virtual std::vector<int> get_cost() const = 0;
 
         virtual bool operator==(const  std::shared_ptr<IMove> rhs)= 0;
         virtual bool operator!=(const  std::shared_ptr<IMove> rhs)= 0;
@@ -28,13 +28,15 @@ class EnterPiece : public IMove{
  public:
         EnterPiece(Pawn pawn);
 
+        EnterPiece(Pawn pawn, std::vector<int> cost);
+
         Status inspect(Rules_Checker &rc, Board board) override;
 
         Status do_move(Board &board) override;
 
         Pawn get_pawn();
 
-        int get_cost() const override;
+        std::vector<int> get_cost() const override;
 
         virtual bool operator==(const  std::shared_ptr<IMove> rhs)override;
         virtual bool operator!=(const  std::shared_ptr<IMove> rhs)override;
@@ -44,6 +46,7 @@ class EnterPiece : public IMove{
         std::string serialize() const override;
  private:
         Pawn pawn;
+        std::vector<int> cost;
         //Status update_board(Board &b) override;
 };
 
@@ -55,7 +58,7 @@ class Move : public IMove{
         int get_start() const;
         int get_distance() const;
 
-        int get_cost() const override;
+        std::vector<int> get_cost() const override;
 
         bool operator==(const Move& rhs) ;
 

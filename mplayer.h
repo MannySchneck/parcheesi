@@ -17,6 +17,10 @@ class M_Player : IPlayer{
 
 
  protected:
+
+#ifdef TEST
+ public:
+#endif
         Color color;
 
         std::optional<Turn> turn;

@@ -402,7 +402,7 @@ std::string Board::serialize_main() const{
 
         for(auto color : Game_Consts::colors){
                 for(auto the_posn : get_pawns_of_color(color)){
-                        if(!std::get<is_home>(the_posn)){
+                        if(!std::get<is_home>(the_posn) && std::get<loc>(the_posn) != -1){
                                 ss << ::serialize(the_posn);
                         }
                 }
