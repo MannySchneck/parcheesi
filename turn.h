@@ -18,7 +18,7 @@ class Turn{
         Board get_new_board();
 
         void add_gas(int gallons);
-        void guzzle_gas(int gallons);
+        void guzzle_gas(std::vector<int> gallons);
  private:
         #ifdef TEST
  public:

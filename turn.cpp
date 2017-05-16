@@ -1,4 +1,5 @@
 #include "rule_checker.h"
+#include "interfaces.h"
 #include "turn.h"
 #include "catch.hpp"
 #include <iostream>
@@ -32,16 +33,16 @@ Status Turn::update_cur_board(mv_ptr mv){
 
         switch(mv_result){
         case(Status::normal):
-                guzzle_gas(mv->get_cost());
+                guzzle_gas({mv->get_cost()});
                 return mv->do_move(cur_board);
                 break;
         case(Status::bop_bonus):
-                guzzle_gas(mv->get_cost());
+                guzzle_gas({mv->get_cost()});
                 fuel.push_back(game_params::bop_bonus);
                 return mv->do_move(cur_board);
                 break;
         case(Status::home_bonus):
-                guzzle_gas(mv->get_cost());
+                guzzle_gas({mv->get_cost()});
                 fuel.push_back(game_params::home_bonus);
                 return mv->do_move(cur_board);
                 break;
@@ -62,13 +63,15 @@ void Turn::add_gas(int gallons){
 }
 
 // \pre: gallons exists in fuel
-void Turn::guzzle_gas(int gallons){
-        auto it = std::find(fuel.begin(), fuel.end(), gallons);
-        if(it == fuel.end()){
-                std::cerr << "Tried to use non-existent fuel" << std::endl;
-                throw std::logic_error("ya done fucked up.");
+void Turn::guzzle_gas(std::vector<int> gallons){
+        for(auto gallon : gallons){
+                auto it = std::find(fuel.begin(), fuel.end(), gallon);
+                if(it == fuel.end()){
+                        std::cerr << "Tried to use non-existent fuel" << std::endl;
+                        throw std::logic_error("ya done goofed.");
+                }
+                fuel.erase(it);
         }
-        fuel.erase(it);
 }
 
 TEST_CASE("Turn tests"){
@@ -140,9 +143,21 @@ TEST_CASE("Turn tests"){
                 Turn turn(old_board, bad_board, Color::red, {5});
 
 
-                turn.guzzle_gas(5);
+                turn.guzzle_gas({Game_Consts::entry_roll});
 
                 REQUIRE(turn.fuel == fuel{});
 
+        }
+
+        SECTION("Remove two gallons from fuel"){
+                Turn turn(old_board, bad_board, Color::red, {3, 2});
+
+                turn.guzzle_gas({3, 2});
+
+                REQUIRE(turn.fuel == fuel{});
+        }
+
+        SECTION("Entering with {3,2} correctly consumes fuel"){
+                
         }
 }
