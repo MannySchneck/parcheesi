@@ -11,6 +11,9 @@ Rules_Checker::Rules_Checker(::fuel fuel):
 
 bool Rules_Checker::validate_main_move(MoveMain* mv, Board &old_board){
 
+        std::cout << "encoujnters blcok\n" << encounters_blockade(mv, old_board) << std::endl;
+
+
         return !(encounters_blockade(mv, old_board) ||
                  tried_safety_bop(mv, old_board) ||
                  pawn_doesnt_exist(mv, old_board) ||
@@ -39,12 +42,16 @@ bool Rules_Checker::encounters_blockade(Move* mv,
 
         std::vector<Space> ispaces;
         if(dynamic_cast<MoveMain*>(mv)){
-                ispaces = old_board.get_intermediate_spaces_main(mv->get_start(),
+                ispaces = old_board.get_intermediate_spaces_main(mv->get_start() + 1,
                                                                  mv->get_distance(),
                                                                  mv->get_pawn());
+                std::cout << "inside the beast\n";
+                std::cout << "start " << mv->get_start() << std::endl;
+                std::cout << "distance " << mv->get_distance() << std::endl;
+                std::cout << "exiting the beast\n";
         }
         else{
-                ispaces = old_board.get_intermediate_spaces_hr(mv->get_start(),
+                ispaces = old_board.get_intermediate_spaces_hr(mv->get_start() + 1,
                                                                mv->get_distance(),
                                                                mv->get_pawn());
         }
@@ -163,7 +170,11 @@ bool Rules_Checker::a_move_exists(Pawn p,
                                 check_board.apply(mh);
                                 return !moved_blockade_together(old_board, check_board);
                         }
-                } else {
+                }
+                else if(loc == -1 && gallon == 5){
+                        return true;
+                }
+                else {
                         std::shared_ptr<IMove> mm{new MoveMain(loc, gallon, p)};
                         if(mm->inspect(*this, check_board) != Status::cheated){
                                 check_board.apply(mm);
@@ -178,17 +189,15 @@ bool Rules_Checker::has_more_moves(Board &new_board, Board &old_board, Color col
 
         auto posns = new_board.get_pawns_of_color(color);
 
-        bool move_exists = false;
-
         for(auto posn : posns){
                 auto the_pawn = std::get<pawn>(posn);
                 auto the_loc = std::get<loc>(posn);
                 auto the_is_home = std::get<is_home>(posn);
 
-                move_exists = move_exists ||
-                        a_move_exists(the_pawn, the_loc, the_is_home, new_board, old_board);
+                if (a_move_exists(the_pawn, the_loc, the_is_home, new_board, old_board)) return true;
         }
-        return move_exists;
+
+        return false;
 }
 
 

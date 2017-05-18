@@ -28,19 +28,23 @@ fuel find_entry_rolls(fuel fuel){
 //FIXME :: Doesn't try to enter piece..
 std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::vector<mv_ptr> bad_moves){
 
+        std::cout << bad_moves << "\n";
         std::optional<mv_ptr> mv{std::nullopt};
 
         auto posns = board.get_sorted_pawns(color, direction);
-        if(posns.size() == 0){
-                return mv;
-        }
+
+        std::cout << "All of the posns are: " << posns;
 
         for(auto posn : posns){
                 auto the_is_home = std::get<is_home>(posn);
                 auto the_loc = std::get<loc>(posn);
                 auto the_pawn = std::get<pawn>(posn);
 
+                std::cout << "___________________________" << std::endl;
+                std::cout << "trying to move posn" << posn << std::endl;
+
                 for (auto gallon : fuel){
+                        std::cout << "With gallon " << gallon << "\n\n\n";
                         if(the_is_home){
                                 mv = mv_ptr{new MoveHome(the_loc, gallon, the_pawn)};
                         }
@@ -52,14 +56,23 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                         }
                         else{
                                 mv = mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
+                                std::cout << "the main move we made is :::";
+                                std::cout <<  *dynamic_cast<MoveMain*>((*mv).get()) << std::endl;
                         }
+
                         if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
                             std::end(bad_moves)){
+                                std::cout << "You can't do that m'kay\n";
+                                std::cout << *mv << "\n\n";
                                 continue;
                         }
 
                         Rules_Checker rc{fuel};
-                        if(mv.has_value() && mv.value()->inspect(rc, board) != Status::cheated){
+
+                        if(mv.has_value()){
+                        std::cout << "Checking, move, resulting in::" <<(int) mv.value()->inspect(rc, board) << "\n\n";
+                        }
+                        if(mv.has_value() && (mv.value()->inspect(rc, board) != Status::cheated)){
                                 return std::optional<mv_ptr>{mv};
                         }
                 }
@@ -197,7 +210,9 @@ TEST_CASE("Make a thing to do a thing") {
         }
 
         SECTION("can't move a blockade"){
-                Dumb_Player pl1(Color::red, Direction::decreasing);
+
+                std::cout << "DEADBEEF";
+                Dumb_Player pl1(Color::red, Direction::increasing);
 
                 board.put_pawn(p0, board.get_color_start_space(Color::red) + 2);
                 board.put_pawn(p1, board.get_color_start_space(Color::red) + 2);
@@ -208,6 +223,9 @@ TEST_CASE("Make a thing to do a thing") {
                 fuel fuel{2,2};
 
                 auto moves = pl1.doMove(board, fuel);
+
+                std::cout << moves << std::endl;
+                std::cout << "The red start is: " << board.get_color_start_space(Color::red);
 
                 Board new_board;
                 new_board.put_pawn(p1, board.get_color_start_space(Color::red) + 6);
