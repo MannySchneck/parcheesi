@@ -450,25 +450,68 @@ std::string Board::serialize_home() const{
 }
 
 bool Board::operator==(const Board &rhs){
-        bool found = true;
-        for(auto color : Game_Consts::colors){
-                if(nest.count(color)){
-                        for(auto pawn : nest.at(color)){
-                                auto pos = std::find(std::begin(rhs.nest.at(color)),
-                                                     std::end(rhs.nest.at(color)),
-                                                     pawn);
-                                if (pos == std::end(rhs.nest.at(color))){
-                                        found = false;
+        auto cmp_things = [](const Board &board1, const Board &board2){
+                //Main rings should be same
+                for(auto pos : board1.positions){
+                        auto loc = pos.first;
+                        auto pawns = pos.second;
+
+                        for(auto pawn : pawns){
+                                if(board1.positions.count(loc) != board2.positions.count(loc)){
+                                        return false;
+                                }else {
+                                        auto pos = std::find(std::begin(board2.positions.at(loc)),
+                                                             std::end(board2.positions.at(loc)),
+                                                             pawn);
+                                        if (pos == std::end(board2.positions.at(loc))) {
+                                                return  false;
+                                        }
                                 }
                         }
                 }
-                found = nest.count(color) == rhs.nest.count(color);
-        }
 
-        return positions == rhs.positions
-                && home_rows == rhs.home_rows
-                && found;
-}
+                //Nests should be same
+                for(auto color : Game_Consts::colors){
+                        if(board1.nest.count(color)){
+                                for(auto pawn : board1.nest.at(color)){
+
+                                        auto pos = std::find(std::begin(board2.nest.at(color)),
+                                                             std::end(board2.nest.at(color)),
+                                                             pawn);
+                                        if (pos == std::end(board2.nest.at(color))) {
+                                                return  false;
+                                        }
+                                }
+                                if(board1.get_nest_count(color) != board2.get_nest_count(color)) return false;
+                        }
+                }
+
+                //Home rows should be same
+                for(auto color : Game_Consts::colors){
+
+                        auto section = board1.home_rows.at(color);
+                        auto rhs_section = board2.home_rows.at(color);
+
+                        for(auto pos : section){
+                                for(auto pawn : pos.second){
+                                        auto loc = pos.first;
+                                        if(rhs_section.count(loc)){
+                                                auto pos = std::find(std::begin(rhs_section.at(loc)),
+                                                                     std::end(rhs_section.at(loc)),
+                                                                     pawn);
+                                                if (pos == std::end(rhs_section.at(loc))) {
+                                                        return  false;
+                                                }
+                                        }
+                                }
+                        }
+
+                }
+                return true; //=)
+         };
+
+         return cmp_things(*this, rhs) && cmp_things(rhs, *this);bool found = true;
+        }
 
 std::ostream& operator<<(std::ostream& os, const Board& c)
 {
