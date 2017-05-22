@@ -28,6 +28,7 @@ fuel find_entry_rolls(fuel fuel){
 //FIXME :: Doesn't try to enter piece..
 std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::vector<mv_ptr> bad_moves){
 
+        //BUG: bad_moves doesn't work bc trying to compare two pointers, not two values
         std::optional<mv_ptr> mv{std::nullopt};
 
         auto posns = board.get_sorted_pawns(color, direction);

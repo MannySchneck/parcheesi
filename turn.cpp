@@ -50,7 +50,7 @@ Status Turn::update_cur_board(mv_ptr mv){
                 return Status::cheated;
                 break;
         default:
-                std::logic_error("Fuck you");
+                std::logic_error("Added a move result and forgot to extend this");
         }
 }
 

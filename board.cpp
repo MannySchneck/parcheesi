@@ -47,14 +47,14 @@ int Board::pos_to_dist(int pos, Color color){
 std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
         auto posns = get_pawns_of_color(color);
         std::sort(std::begin(posns), std::end(posns),
-                  [this, dir, color](const Posn &fuck, const Posn &you){
-                          if(std::get<loc>(you) == -1)
+                  [this, dir, color](const Posn &pos1, const Posn &pos2){
+                          if(std::get<loc>(pos2) == -1)
                                   return false;
 
-                          bool same_ring = std::get<is_home>(fuck) == std::get<is_home>(you);
-                          bool index_greater = std::get<is_home>(you) ? std::get<loc>(you) > std::get<loc>(fuck) :
-                                  pos_to_dist(std::get<loc>(you), color) > pos_to_dist(std::get<loc>(fuck), color);
-                          bool home_beats_ring = std::get<is_home>(you) && !std::get<is_home>(fuck);
+                          bool same_ring = std::get<is_home>(pos1) == std::get<is_home>(pos2);
+                          bool index_greater = std::get<is_home>(pos2) ? std::get<loc>(pos2) > std::get<loc>(pos1) :
+                                  pos_to_dist(std::get<loc>(pos2), color) > pos_to_dist(std::get<loc>(pos1), color);
+                          bool home_beats_ring = std::get<is_home>(pos2) && !std::get<is_home>(pos1);
 
                           bool result;
 
@@ -72,7 +72,7 @@ std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
                           case(Direction::decreasing):
                                   return !result;
                           default:
-                                  throw std::logic_error("Fuck you. Shoulda used coq");
+                                  throw std::logic_error("Extended Direction and forgot to extend this");
                           }
                   });
         return posns;
