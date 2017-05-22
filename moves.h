@@ -3,11 +3,12 @@
 #include "interfaces.h"
 #include "board.h"
 #include "rule_checker.h"
+#include <sstream>
 
 class Rules_Checker;
 
 class IMove :
-        public Serializable{
+public Serializable{
  public:
         virtual Status inspect(Rules_Checker &rc, Board board) = 0;
         virtual Status do_move(Board &board) = 0;
@@ -21,7 +22,6 @@ class IMove :
 };
 
 using mv_ptr = std::shared_ptr<IMove>;
-
 
 // represents a move where a player enters a piece
 class EnterPiece : public IMove{
@@ -66,7 +66,7 @@ class Move : public IMove{
 
 
         std::string serialize() const override;
-protected:
+ protected:
         Pawn pawn;
         int start;
         int distance;
@@ -104,3 +104,6 @@ class MoveHome : public Move{
 
         std::string serialize() const override;
 };
+
+std::string serialize_mv_ptr(const mv_ptr &mv);
+

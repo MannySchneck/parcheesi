@@ -54,10 +54,18 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                         else{
                                 mv = mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
                         }
-                        if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
-                            std::end(bad_moves)){
-                                continue;
+
+                        bool is_bad_move = false;
+                        for(auto bad_move : bad_moves){
+                                std::cout << "Our move is: " << serialize_mv_ptr(mv.value()) << std::endl;
+                                std::cout << "The bad move is: " << serialize_mv_ptr(bad_move) << std::endl;
+                                if(mv.value()->operator==(bad_move)) is_bad_move = true;
                         }
+                        if(is_bad_move) continue;
+                        // if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
+                        //     std::end(bad_moves)){
+                        //         continue;
+                        // }
 
                         Rules_Checker rc{fuel};
                         if(mv.has_value() && mv.value()->inspect(rc, board) != Status::cheated){

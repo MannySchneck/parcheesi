@@ -168,6 +168,7 @@ Status MoveHome::inspect(Rules_Checker &rc, Board board){
 
 IMove::IMove() = default;
 
+
 EnterPiece::EnterPiece(Pawn pawn):
         pawn(pawn),
         cost({5 })
@@ -200,3 +201,26 @@ MoveMain::MoveMain(int start, int distance, Pawn pawn)
 
 MoveHome::MoveHome(int start, int distance, Pawn pawn)
         : Move(start,distance,pawn){}
+
+std::string serialize_mv_ptr(const mv_ptr &mv){
+        std::stringstream ss;
+        std::shared_ptr<EnterPiece> the_move;
+        if((the_move = std::dynamic_pointer_cast<EnterPiece>(mv))){
+                ss << "(EnterPiece ";
+                ss << (the_move.get())->get_pawn();
+                ss << ")";
+                return ss.str();
+        } else {
+                std::shared_ptr<Move> the_move;
+                if((the_move = std::dynamic_pointer_cast<MoveMain>(mv)))
+                        ss << "(MoveMain ";
+                else if((the_move = std::dynamic_pointer_cast<MoveHome>(mv)))
+                        ss << "(MoveHome ";
+                else
+                        throw std::logic_error("Added a new move type and forgot to extend this");
+                ss << the_move.get()->get_start() << " ";
+                ss << the_move.get()->get_distance() << " ";
+                ss << the_move.get()->get_pawn() << ")";
+                return ss.str();
+        }
+}
