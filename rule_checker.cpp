@@ -40,12 +40,12 @@ bool Rules_Checker::encounters_blockade(Move* mv,
         std::vector<Space> ispaces;
         if(dynamic_cast<MoveMain*>(mv)){
                 ispaces = old_board.get_intermediate_spaces_main(mv->get_start() + 1,
-                                                                 mv->get_distance(),
+                                                                 mv->get_distance() - 1,
                                                                  mv->get_pawn());
         }
         else{
                 ispaces = old_board.get_intermediate_spaces_hr(mv->get_start() + 1,
-                                                               mv->get_distance(),
+                                                               mv->get_distance() - 1,
                                                                mv->get_pawn());
         }
 
