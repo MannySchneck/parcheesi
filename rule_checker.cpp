@@ -10,18 +10,6 @@ Rules_Checker::Rules_Checker(::fuel fuel):
         fuel(fuel){}
 
 bool Rules_Checker::validate_main_move(MoveMain* mv, Board &old_board){
-
-        std::cout << "Did we encouter a blockade? " << encounters_blockade(mv, old_board) << std::endl;
-        std::cout << "Did we try a saftey bop? " << tried_safety_bop(mv, old_board) << std::endl;
-        std::cout << "Does the pawn not exist? " << pawn_doesnt_exist(mv, old_board) << std::endl;
-        std::cout << "Did we move an illegal distance? " << illegal_distance(mv, old_board) << std::endl;
-
-        std::cout << "Yet apparently we cheated? " << !(encounters_blockade(mv, old_board) ||
-                                                        tried_safety_bop(mv, old_board) ||
-                                                        pawn_doesnt_exist(mv, old_board) ||
-                                                        illegal_distance(mv, old_board))
-                  << std::endl;
-
         return !(encounters_blockade(mv, old_board) ||
                  tried_safety_bop(mv, old_board) ||
                  pawn_doesnt_exist(mv, old_board) ||

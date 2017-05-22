@@ -16,7 +16,7 @@ Status Board::apply(std::shared_ptr<IMove> mv){
         Status status;
 
         if(auto mm = dynamic_cast<MoveMain*>(mv.get())){
-                status = move_pawn(mm->get_start(),
+                 move_pawn(mm->get_start(),
                                    mm->get_distance(),
                                    mm->get_pawn());
         } else if(auto mh = dynamic_cast<MoveHome*>(mv.get())){
@@ -27,12 +27,6 @@ Status Board::apply(std::shared_ptr<IMove> mv){
                 status = enter_pawn(me->get_pawn());
         } else {
                 throw std::logic_error("You added a new move type and forgot to change apply");
-        }
-
-        if(status == Status::cheated){
-                throw std::logic_error("Tried to apply an invalid move!\n"
-                                       "Dumbass.\n"
-                                       "Did you call the rules checker before applying the move????????");
         }
 
         return Status::normal;
@@ -235,10 +229,6 @@ Status Board::move_pawn_hr(int start, int distance, Pawn p){
 
         int target_pos = start + distance;
 
-        if(hr_is_blockade(start, target_pos, p)){
-                return Status::cheated;
-        }
-
         auto& space = row[start];
         // lol
         space.erase((space.begin()->id == p.id) ?
@@ -260,9 +250,6 @@ Status Board::move_pawn_hr(int start, int distance, Pawn p){
 Status Board::move_onto_hr(int start, int num_into_hr, Pawn p){
         remove_pawn(start, p, positions);
 
-        if(hr_is_blockade(start, num_into_hr, p)){
-                return Status::cheated;
-        }
         if(num_into_hr == home_row_spaces){
                 home[p.color].push_back(p);
                 return Status::home_bonus;
@@ -274,15 +261,11 @@ Status Board::move_onto_hr(int start, int num_into_hr, Pawn p){
 Status Board::move_pawn(int start, int dist, Pawn p){ // XXX
         int final_pos = (start + dist) % ring_spaces;
         if(is_contains(start, final_pos, final_ring[p.color])){
-                if(is_blockade(start, modulo(final_ring[p.color] - start, ring_spaces)))
-                        return Status::cheated;
 
                 int num_into_hr = modulo(final_pos - final_ring[p.color], ring_spaces);
                 return move_onto_hr(start, num_into_hr, p);
         }
 
-        if(is_blockade(start, dist))
-                return Status::cheated;
         remove_pawn(start, p, positions);
         positions[final_pos].push_back(p);
         return try_bop(final_pos, p, false);
@@ -298,11 +281,7 @@ void Board::remove_pawn(int pos, Pawn p, Section &section){
 Status Board::enter_pawn(Pawn p){
         Color color = p.color;
         int start_pos = starting_pos[color];
-        if(is_blockade(start_pos, 0))
-                return Status::cheated;
-        if(nest[p.color].size() == 0){
-                return Status::cheated;
-        }
+
         positions[start_pos].push_back(p);
 
         auto pos = std::find(std::begin(nest[p.color]), std::end(nest[p.color]), p);
@@ -314,10 +293,6 @@ Status Board::enter_pawn(Pawn p){
 }
 
 Status Board::try_bop(int pos, Pawn p, bool entering){
-        if(!entering
-           && safety_spaces.count(pos)
-           && positions[pos].size() > 1)
-                return Status::cheated;
         if(positions[pos].size() != 2)
                 return Status::normal;
         if(positions[pos][0].color != p.color){
@@ -615,8 +590,6 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
                 board.enter_pawn(p2);
 
-                REQUIRE(board.move_pawn(board.get_color_start_space(Color::red), 5, p2)
-                        == Status::cheated);
         }
 
         SECTION("Test bop"){
@@ -643,9 +616,6 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
                 Pawn p1(0, Color::blue);
                 board.enter_pawn(p1);
-
-                REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), 7, p1)
-                        == Status::cheated);
 
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)][0] == p1);
 

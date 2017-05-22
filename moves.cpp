@@ -5,7 +5,8 @@
 #include <iostream>
 
 Status Move::do_move(Board &board){
-        return board.move_pawn(start, distance, pawn);
+        board.move_pawn(start, distance, pawn);
+        return Status::normal;
 }
 
 std::vector<int> Move::get_cost() const{
@@ -60,7 +61,6 @@ std::string MoveHome::serialize() const{
 
 Status MoveMain::inspect(Rules_Checker &rc, Board board){
         if(!rc.validate_main_move(this, board)){
-                std::cout << "Inspect thinks we cheated" << std::endl;
                 return Status::cheated;
         }
 
@@ -118,10 +118,9 @@ bool MoveHome::operator!=(const  std::shared_ptr<IMove> rhs) {
         return !(*this == rhs);
 }
 
-
-
 Status EnterPiece::do_move(Board &board){
-       return board.enter_pawn(pawn);
+       board.enter_pawn(pawn);
+       return Status::normal;
 }
 
 bool EnterPiece::operator==(const  std::shared_ptr<IMove> rhs) {

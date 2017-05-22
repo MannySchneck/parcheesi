@@ -40,7 +40,6 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                 auto the_is_home = std::get<is_home>(posn);
                 auto the_loc = std::get<loc>(posn);
                 auto the_pawn = std::get<pawn>(posn);
-                std::cout << "Pawn " << the_pawn << " is at space #" << the_loc << std::endl;
 
                 for (auto gallon : fuel){
                         if(the_is_home){
@@ -58,10 +57,7 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
 
                         if(mv.has_value()){
                                 bool is_bad_move = false;
-                                std::cout << "Entering the bad_moves loop" << std::endl;
                                 for(auto bad_move : bad_moves){
-                                        std::cout << "Our move is: " << serialize_mv_ptr(mv.value()) << std::endl;
-                                        std::cout << "The bad move is: " << serialize_mv_ptr(bad_move) << std::endl << std::endl;
                                         if(mv.value()->operator==(bad_move)) is_bad_move = true;
                                 }
                                 if(is_bad_move) continue;
