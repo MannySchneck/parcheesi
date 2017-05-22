@@ -2,6 +2,7 @@
 #include "moves.h"
 #include <typeinfo>
 #include <sstream>
+#include <iostream>
 
 Status Move::do_move(Board &board){
         return board.move_pawn(start, distance, pawn);
@@ -59,6 +60,7 @@ std::string MoveHome::serialize() const{
 
 Status MoveMain::inspect(Rules_Checker &rc, Board board){
         if(!rc.validate_main_move(this, board)){
+                std::cout << "Inspect thinks we cheated" << std::endl;
                 return Status::cheated;
         }
 

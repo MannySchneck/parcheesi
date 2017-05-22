@@ -40,6 +40,7 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                 auto the_is_home = std::get<is_home>(posn);
                 auto the_loc = std::get<loc>(posn);
                 auto the_pawn = std::get<pawn>(posn);
+                std::cout << "Pawn " << the_pawn << " is at space #" << the_loc << std::endl;
 
                 for (auto gallon : fuel){
                         if(the_is_home){
@@ -64,13 +65,9 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                                         if(mv.value()->operator==(bad_move)) is_bad_move = true;
                                 }
                                 if(is_bad_move) continue;
-                                // if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
-                                //     std::end(bad_moves)){
-                                //         continue;
-                                // }
 
                                 Rules_Checker rc{fuel};
-                                if(mv.has_value() && mv.value()->inspect(rc, board) != Status::cheated){
+                                if(mv.value()->inspect(rc, board) != Status::cheated){
                                         return mv;
                                 }
                         }

@@ -29,12 +29,16 @@ Board Turn::get_new_board(){
 
 Status Turn::update_cur_board(mv_ptr mv){
         Rules_Checker rc{fuel};
-        auto mv_result = mv->inspect(rc, old_board);
+        auto mv_result = mv->inspect(rc, cur_board);
+        std::cout << "The result of the move is: " << (int)mv_result << std::endl;
 
+        Status res;
         switch(mv_result){
         case(Status::normal):
                 guzzle_gas({mv->get_cost()});
-                return mv->do_move(cur_board);
+                res = mv->do_move(cur_board);
+                std::cout << "The result of do_move is: " << (int)res << std::endl;
+                return res;
                 break;
         case(Status::bop_bonus):
                 guzzle_gas({mv->get_cost()});

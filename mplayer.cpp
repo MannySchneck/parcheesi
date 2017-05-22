@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <set>
+#include <iostream>
 
 std::string M_Player::startGame(Color color){
         this->color = color;
@@ -15,8 +16,11 @@ std::vector<mv_ptr> M_Player::doMove(Board board, fuel fuel){
         std::optional<mv_ptr> mv;
 
         turn = Turn(board, color, fuel);
-        while((mv = construct_move(board, fuel, bad_moves))){
-                if(Status::cheated  == turn->update_cur_board(mv.value())){
+        while((mv = construct_move(turn->get_new_board(), fuel, bad_moves))){
+                std::cout << "Constructed this move: " << serialize_mv_ptr(mv.value()) << std::endl;
+                auto turn_res = turn->update_cur_board(mv.value());
+                if(turn_res == Status::cheated){
+                        std::cout << "And cheated\n";
                         bad_moves.push_back(mv.value());
                 } else{
                         bad_moves = {};

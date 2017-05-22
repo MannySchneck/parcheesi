@@ -211,24 +211,24 @@ bool Board::is_contains(int start, int end, int pos) const{
 
 // Todo:
 // refactor to include
-bool Board::is_blockade(int start, int dist){
-        for(int i = 0; i <= dist; i++){
-                if(positions[(start + i) % ring_spaces].size() > 1){
-                        return true;
-                }
-        }
-        return false;
-}
+// bool Board::is_blockade(int start, int dist){
+//         for(int i = 1; i < dist; i++){
+//                 if(positions[(start + i) % ring_spaces].size() > 1){
+//                         return true;
+//                 }
+//         }
+//         return false;
+// }
 
 
-bool Board:: hr_is_blockade(int start, int dist, Pawn p){
-        for(int i = 0; i <= dist; i++){
-                if(home_rows[p.color][(start + i) % ring_spaces].size() > 1){
-                        return true;
-                }
-        }
-        return false;
-}
+// bool Board:: hr_is_blockade(int start, int dist, Pawn p){
+//         for(int i = 0; i <= dist; i++){
+//                 if(home_rows[p.color][(start + i) % ring_spaces].size() > 1){
+//                         return true;
+//                 }
+//         }
+//         return false;
+// }
 
 Status Board::move_pawn_hr(int start, int distance, Pawn p){
         home_row_t &row = home_rows.at(p.color);
