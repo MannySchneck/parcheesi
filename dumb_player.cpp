@@ -55,22 +55,24 @@ std::optional<mv_ptr> Dumb_Player::construct_move(Board board, fuel fuel, std::v
                                 mv = mv_ptr{new MoveMain(the_loc, gallon, the_pawn)};
                         }
 
-                        bool is_bad_move = false;
-                        std::cout << "Entering the bad_moves loop" << std::endl;
-                        for(auto bad_move : bad_moves){
-                                std::cout << "Our move is: " << serialize_mv_ptr(mv.value()) << std::endl;
-                                std::cout << "The bad move is: " << serialize_mv_ptr(bad_move) << std::endl << std::endl;
-                                if(mv.value()->operator==(bad_move)) is_bad_move = true;
-                        }
-                        if(is_bad_move) continue;
-                        // if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
-                        //     std::end(bad_moves)){
-                        //         continue;
-                        // }
+                        if(mv.has_value()){
+                                bool is_bad_move = false;
+                                std::cout << "Entering the bad_moves loop" << std::endl;
+                                for(auto bad_move : bad_moves){
+                                        std::cout << "Our move is: " << serialize_mv_ptr(mv.value()) << std::endl;
+                                        std::cout << "The bad move is: " << serialize_mv_ptr(bad_move) << std::endl << std::endl;
+                                        if(mv.value()->operator==(bad_move)) is_bad_move = true;
+                                }
+                                if(is_bad_move) continue;
+                                // if (std::find(std::begin(bad_moves), std::end(bad_moves), mv) !=
+                                //     std::end(bad_moves)){
+                                //         continue;
+                                // }
 
-                        Rules_Checker rc{fuel};
-                        if(mv.has_value() && mv.value()->inspect(rc, board) != Status::cheated){
-                                return std::optional<mv_ptr>{mv};
+                                Rules_Checker rc{fuel};
+                                if(mv.has_value() && mv.value()->inspect(rc, board) != Status::cheated){
+                                        return mv;
+                                }
                         }
                 }
         }
@@ -181,16 +183,16 @@ TEST_CASE("Make a thing to do a thing") {
         }
 
         SECTION("entering a piece when direction increasing"){
-                        Dumb_Player pl1(Color::red, Direction::increasing);
+                Dumb_Player pl1(Color::red, Direction::increasing);
 
-                        fuel fuel1{5};
+                fuel fuel1{5};
 
-                        mv_ptr mv{new EnterPiece{p0}};
-                        REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel1, {mv}).value())) == mv);
+                mv_ptr mv{new EnterPiece{p0}};
+                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel1, {}).value())) == mv);
 
-                        fuel fuel2{3, 2};
+                fuel fuel2{3, 2};
 
-                        REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel2, {mv}).value())) == mv);
+                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel2, {}).value())) == mv);
         }
 
         SECTION("entering a piece when direction decreasing"){
@@ -199,11 +201,11 @@ TEST_CASE("Make a thing to do a thing") {
                 fuel fuel1{5};
 
                 mv_ptr mv{new EnterPiece{p0}};
-                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel1, {mv}).value())) == mv);
+                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel1, {}).value())) == mv);
 
                 fuel fuel2{3, 2};
 
-                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel2, {mv}).value())) == mv);
+                REQUIRE(*(std::dynamic_pointer_cast<EnterPiece>(pl1.construct_move(board, fuel2, {}).value())) == mv);
         }
 
         SECTION("can't move a blockade"){
