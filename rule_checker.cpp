@@ -39,12 +39,12 @@ bool Rules_Checker::encounters_blockade(Move* mv,
 
         std::vector<Space> ispaces;
         if(dynamic_cast<MoveMain*>(mv)){
-                ispaces = old_board.get_intermediate_spaces_main(mv->get_start(),
+                ispaces = old_board.get_intermediate_spaces_main(mv->get_start() + 1,
                                                                  mv->get_distance(),
                                                                  mv->get_pawn());
         }
         else{
-                ispaces = old_board.get_intermediate_spaces_hr(mv->get_start(),
+                ispaces = old_board.get_intermediate_spaces_hr(mv->get_start() + 1,
                                                                mv->get_distance(),
                                                                mv->get_pawn());
         }
@@ -178,17 +178,15 @@ bool Rules_Checker::has_more_moves(Board &new_board, Board &old_board, Color col
 
         auto posns = new_board.get_pawns_of_color(color);
 
-        bool move_exists = false;
-
         for(auto posn : posns){
                 auto the_pawn = std::get<pawn>(posn);
                 auto the_loc = std::get<loc>(posn);
                 auto the_is_home = std::get<is_home>(posn);
 
-                move_exists = move_exists ||
-                        a_move_exists(the_pawn, the_loc, the_is_home, new_board, old_board);
+                if(a_move_exists(the_pawn, the_loc, the_is_home, new_board, old_board))
+                        return true;
         }
-        return move_exists;
+        return false;
 }
 
 

@@ -88,13 +88,13 @@ TEST_CASE("Turn tests"){
 
                 bad_board.put_pawn(rp0, 5);
                 bad_board.put_pawn(rp1, 5);
-                Turn turn1(old_board, bad_board, Color::red, {5, 6});
+                Turn turn1(old_board, bad_board, Color::red, {});
 
                 REQUIRE(turn1.validate() == false);
 
-                good_board.put_pawn(rp0, 4);
-                bad_board.put_pawn(rp1, 5);
-                Turn turn2(old_board, bad_board, Color::red, {4,6});
+                good_board.put_pawn(rp0, 5);
+                good_board.put_pawn(rp1, 7);
+                Turn turn2(old_board, good_board, Color::red, {});
 
                 REQUIRE(turn2.validate() == true);
         }

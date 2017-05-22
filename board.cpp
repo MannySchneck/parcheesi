@@ -508,10 +508,10 @@ bool Board::operator==(const Board &rhs){
 
                 }
                 return true; //=)
-         };
+        };
 
-         return cmp_things(*this, rhs) && cmp_things(rhs, *this);bool found = true;
-        }
+        return cmp_things(*this, rhs) && cmp_things(rhs, *this);bool found = true;
+}
 
 std::ostream& operator<<(std::ostream& os, const Board& c)
 {
