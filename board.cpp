@@ -13,18 +13,16 @@
 
 Status Board::apply(std::shared_ptr<IMove> mv){
 
-        Status status;
-
         if(auto mm = dynamic_cast<MoveMain*>(mv.get())){
-                 move_pawn(mm->get_start(),
-                                   mm->get_distance(),
-                                   mm->get_pawn());
+                move_pawn(mm->get_start(),
+                          mm->get_distance(),
+                          mm->get_pawn());
         } else if(auto mh = dynamic_cast<MoveHome*>(mv.get())){
-                status = move_pawn_hr(mh->get_start(),
-                                      mh->get_distance(),
-                                      mh->get_pawn());
+                move_pawn_hr(mh->get_start(),
+                             mh->get_distance(),
+                             mh->get_pawn());
         } else if(auto me = dynamic_cast<EnterPiece*>(mv.get())){
-                status = enter_pawn(me->get_pawn());
+                enter_pawn(me->get_pawn());
         } else {
                 throw std::logic_error("You added a new move type and forgot to change apply");
         }
@@ -202,35 +200,13 @@ bool Board::is_contains(int start, int end, int pos) const{
         }
 }
 
-
-// Todo:
-// refactor to include
-// bool Board::is_blockade(int start, int dist){
-//         for(int i = 1; i < dist; i++){
-//                 if(positions[(start + i) % ring_spaces].size() > 1){
-//                         return true;
-//                 }
-//         }
-//         return false;
-// }
-
-
-// bool Board:: hr_is_blockade(int start, int dist, Pawn p){
-//         for(int i = 0; i <= dist; i++){
-//                 if(home_rows[p.color][(start + i) % ring_spaces].size() > 1){
-//                         return true;
-//                 }
-//         }
-//         return false;
-// }
-
-Status Board::move_pawn_hr(int start, int distance, Pawn p){
+void Board::move_pawn_hr(int start, int distance, Pawn p){
         home_row_t &row = home_rows.at(p.color);
 
         int target_pos = start + distance;
 
         auto& space = row[start];
-        // lol
+
         space.erase((space.begin()->id == p.id) ?
                     space.begin() :
                     std::next(space.begin()));
@@ -238,37 +214,34 @@ Status Board::move_pawn_hr(int start, int distance, Pawn p){
 
         if(start + distance == home_row_spaces){
                 home[p.color].push_back(p);
-                return Status::home_bonus;
+        } else{
+                row[target_pos].push_back(p);
         }
-
-
-        row[target_pos].push_back(p);
-        return Status::normal;
 }
 
 
-Status Board::move_onto_hr(int start, int num_into_hr, Pawn p){
+void Board::move_onto_hr(int start, int num_into_hr, Pawn p){
         remove_pawn(start, p, positions);
 
         if(num_into_hr == home_row_spaces){
                 home[p.color].push_back(p);
-                return Status::home_bonus;
+        } else {
+                home_rows[p.color][num_into_hr].push_back(p);
         }
-        home_rows[p.color][num_into_hr].push_back(p);
-        return Status::normal;
 }
 
-Status Board::move_pawn(int start, int dist, Pawn p){ // XXX
+void Board::move_pawn(int start, int dist, Pawn p){ // XXX
         int final_pos = (start + dist) % ring_spaces;
         if(is_contains(start, final_pos, final_ring[p.color])){
 
                 int num_into_hr = modulo(final_pos - final_ring[p.color], ring_spaces);
-                return move_onto_hr(start, num_into_hr, p);
-        }
+                move_onto_hr(start, num_into_hr, p);
+        } else{
 
-        remove_pawn(start, p, positions);
-        positions[final_pos].push_back(p);
-        return try_bop(final_pos, p, false);
+                remove_pawn(start, p, positions);
+                positions[final_pos].push_back(p);
+                try_bop(final_pos, p, false);
+        }
 }
 
 // pre: pawn must exist at pos. rules_checker will ensure this.
@@ -278,7 +251,7 @@ void Board::remove_pawn(int pos, Pawn p, Section &section){
 }
 
 
-Status Board::enter_pawn(Pawn p){
+void Board::enter_pawn(Pawn p){
         Color color = p.color;
         int start_pos = starting_pos[color];
 
@@ -289,19 +262,15 @@ Status Board::enter_pawn(Pawn p){
                 nest[p.color].erase(pos);
         }
 
-        return try_bop(start_pos, p, true);
+        try_bop(start_pos, p, true);
 }
 
-Status Board::try_bop(int pos, Pawn p, bool entering){
-        if(positions[pos].size() != 2)
-                return Status::normal;
-        if(positions[pos][0].color != p.color){
+void Board::try_bop(int pos, Pawn p, bool entering){
+        if(positions[pos][0].color != p.color && positions[pos].size() == 2){
                 auto the_pawn = positions[pos].begin();
                 nest[the_pawn->color].push_back(*the_pawn);
                 positions[pos].erase(positions[pos].begin());
-                return Status::bop_bonus;
         }
-        return Status::normal;
 }
 
 std::unordered_set<int> Board::get_blockades(){
@@ -511,13 +480,13 @@ TEST_CASE("Enter Pawn", "[Enter Pawn]") {
 
         SECTION("Color::red"){
                 Pawn p(0, Color::red);
-                REQUIRE(board.enter_pawn(p) == Status::normal);
+                board.enter_pawn(p);
                 REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::red))[0] == p);
         }
 
         SECTION("blue 1 pawn"){
                 Pawn p(3,Color::blue);
-                REQUIRE(board.enter_pawn(p) == Status::normal);
+                board.enter_pawn(p);
                 REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue))[0] == p);
 
         }
@@ -525,8 +494,8 @@ TEST_CASE("Enter Pawn", "[Enter Pawn]") {
         SECTION("blue 2 pawns"){
                 Pawn p(3,Color::blue);
                 Pawn p2(2, Color::blue);
-                REQUIRE(board.enter_pawn(p) == Status::normal);
-                REQUIRE(board.enter_pawn(p2) == Status::normal);
+                board.enter_pawn(p);
+                board.enter_pawn(p2);
                 REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue))[0] == p);
                 REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue))[1] == p2);
 
@@ -543,8 +512,7 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
                 board.enter_pawn(p);
 
-                REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), i, p) ==
-                        Status::normal);
+                board.move_pawn(board.get_color_start_space(Color::blue), i, p);
 
                 REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue)
                                                + i % board.ring_spaces)[0]
@@ -561,8 +529,7 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
                         board.enter_pawn(p);
 
-                        REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), i, p) ==
-                                Status::normal);
+                        board.move_pawn(board.get_color_start_space(Color::blue), i, p);
 
                         REQUIRE(board.get_pawns_at_pos(board.get_color_start_space(Color::blue)
                                                        + i % board.ring_spaces)[0]
@@ -582,8 +549,7 @@ TEST_CASE("move_pawn", "test move to safety space"){
                 board.put_pawn(p0, blockade_target);
                 board.enter_pawn(p1);
 
-                REQUIRE(board.move_pawn(red_start, 5, p1)
-                        == Status::normal);
+                board.move_pawn(red_start, 5, p1);
 
                 REQUIRE(board.positions[blockade_target][0] == p0);
                 REQUIRE(board.positions[blockade_target][1] == p1);
@@ -601,8 +567,7 @@ TEST_CASE("move_pawn", "test move to safety space"){
                 Pawn p1(0, Color::blue);
                 board.enter_pawn(p1);
 
-                REQUIRE(board.move_pawn(board.get_color_start_space(Color::blue), 4, p1)
-                        == Status::bop_bonus);
+                board.move_pawn(board.get_color_start_space(Color::blue), 4, p1);
 
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)+4].size() == 1);
                 REQUIRE(board.positions[board.get_color_start_space(Color::blue)+4][0] == p1);
@@ -634,7 +599,7 @@ TEST_CASE("move_pawn", "test move to safety space"){
 
                 int thingo = board.nest[p1.color].size();
 
-                REQUIRE(board.enter_pawn(p1) == Status::bop_bonus);
+                board.enter_pawn(p1);
                 REQUIRE(board.nest[p1.color].size() == thingo - 1);
                 REQUIRE(board.nest[p0.color].size() == thing + 1);
 
@@ -685,7 +650,7 @@ TEST_CASE("moving on home row"){
 
         board.home_rows[Color::blue][2].push_back(p0);
 
-        REQUIRE(board.move_pawn_hr(2, 3, p0) == Status::normal);
+        board.move_pawn_hr(2, 3, p0);
         REQUIRE(board.home_rows[p0.color][5].size() == 1);
         REQUIRE(board.home_rows[p0.color][5][0] == p0);
         REQUIRE(board.home_rows[p0.color][2].size() == 0);
@@ -697,7 +662,7 @@ TEST_CASE("moving home all the way baby"){
 
         board.home_rows[Color::blue][2].push_back(p0);
 
-        REQUIRE(board.move_pawn_hr(2, 5, p0) == Status::home_bonus);
+        board.move_pawn_hr(2, 5, p0);
         REQUIRE(board.home_rows[p0.color][2].size() == 0);
         REQUIRE(board.home[Color::blue][0] == p0);
 }

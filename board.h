@@ -78,12 +78,12 @@ class Board :
         bool is_contains(int start, int end, int pos) const;
         bool is_blockade(int start, int dist);
         bool hr_is_blockade(int start, int dist, Pawn p);
-        Status move_onto_hr(int start, int num_into_hr, Pawn p);
-        Status move_pawn(int start, int dist, Pawn p);
-        Status move_pawn_hr(int start, int distance, Pawn p);
+        void move_onto_hr(int start, int num_into_hr, Pawn p);
+        void move_pawn(int start, int dist, Pawn p);
+        void move_pawn_hr(int start, int distance, Pawn p);
         void remove_pawn(int pos, Pawn p, Section &section);
-        Status enter_pawn(Pawn p);
-        Status try_bop(int pos, Pawn p, bool entering);
+        void enter_pawn(Pawn p);
+        void try_bop(int pos, Pawn p, bool entering);
 
         int get_hr_spaces() const;
 

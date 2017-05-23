@@ -5,9 +5,7 @@
 class Net_Connection{
 public:
         Net_Connection();
-        Net_Connection(boost::asio::io_service io_service_,
-                       boost::asio::ip::tcp::socket socket_,
-                       boost::asio::ip::tcp::socket otherside); // gotta take it on the otherside, after all
+        Net_Connection(boost::asio::ip::tcp::endpoint otherside); // gotta take it on the otherside, after all
 
         std::string read_response();
 
@@ -15,7 +13,7 @@ public:
 protected:
         boost::asio::io_service io_service_;
         boost::asio::ip::tcp::socket socket_;
-        boost::asio::ip::tcp::endpoint server;
+        boost::asio::ip::tcp::endpoint otherside;
 };
 
 class Net_Connection_Client :
@@ -25,8 +23,8 @@ public:
 
 class Net_Connection_Server :
         public Net_Connection{
-        Net_Connection_Server(boost::asio::io_service io_service_,
-                              boost::asio::ip::tcp::socket socket_,
+
+        Net_Connection_Server(boost::asio::ip::tcp::socket socket_,
                               boost::asio::ip::tcp::socket client);
 
         void accept_connection();
