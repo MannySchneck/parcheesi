@@ -1,4 +1,5 @@
 CPP_PROG_FILES := board.cpp game.cpp moves.cpp rule_checker.cpp turn.cpp splayer.cpp mplayer.cpp dumb_player.cpp interfaces.cpp parser.cpp arg_wrapper_classes.cpp network.cpp
+
 CPP_OBJ_FILES := $(CPP_PROG_FILES:.cpp=.o)
 
 CPP_TEST_FILES :=  test/rules_tests.cpp
@@ -25,6 +26,9 @@ all: tests program
 tests: bin/test_main.o $(CPP_OBJ_FILES)
 	$(CCX) $(CCX_FLAGS) $(CPP_TEST_FILES) $^ -o test.bin
 	./test.bin
+
+libcheesy.a: $(CPP_OBJ_FILES)
+	ar -rv libcheesy.a $^
 
 $(CPP_OBJ_FILES): %.o:%.cpp
 	$(CC) $(CCX_FLAGS)  -c $< -o $@

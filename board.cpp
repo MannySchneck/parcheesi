@@ -30,11 +30,9 @@ Status Board::apply(std::shared_ptr<IMove> mv){
         return Status::normal;
 }
 
-
 int Board::pos_to_dist(int pos, Color color){
         return modulo(pos - starting_pos[color], ring_spaces);
 }
-
 
 std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
         auto posns = get_pawns_of_color(color);
@@ -49,7 +47,6 @@ std::vector<Posn> Board::get_sorted_pawns(Color color, Direction dir){
                           bool home_beats_ring = std::get<is_home>(pos2) && !std::get<is_home>(pos1);
 
                           bool result;
-
 
                           if(same_ring){
                                   result = index_greater;
